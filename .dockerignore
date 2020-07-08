@@ -1,0 +1,7 @@
+node_modules
+debug
+dist
+Dockerfile
+.git
+.vscode
+!dist/

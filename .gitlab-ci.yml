@@ -1,0 +1,154 @@
+image: node:14-alpine
+stages:
+    - dependencies
+    - lint
+    - build project
+    - build image
+    - test
+    - push
+    - deploy
+
+workflow:
+    rules:
+        - if: $CI_MERGE_REQUEST_ID
+          when: never
+        - when: always
+
+install-deps:
+    stage: dependencies
+    artifacts:
+        paths:
+            - node_modules/
+    script:
+        - npm install
+
+lint-project:
+    dependencies:
+        - install-deps
+    stage: lint
+    rules:
+        - if: '$CI_COMMIT_MESSAGE  =~ /^hotfix/'
+          when: never
+        - when: on_success
+    script:
+        - npm run test:lint
+        - npm run test:pretty
+
+build-project:
+    dependencies:
+        - install-deps
+    stage: build project
+    artifacts:
+        paths:
+            - dist/
+    script:
+        - npm run tsc
+        - cp Dockerfile dist/
+
+build-image:
+    tags:
+        - docky
+    dependencies:
+        - build-project
+        - install-deps
+    retry:
+        max: 2
+    stage: build image
+    variables:
+        GIT_STRATEGY: none
+    image: docker:stable
+    before_script:
+        - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    script:
+        - mv ./dist/Dockerfile ./
+        - mv ./dist/proxy-cert.crt ./
+        - mv ./dist/proxy-cert.pem ./
+        - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG .
+        - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+
+test-ci:
+    retry:
+        max: 2
+        when:
+            - always
+    dependencies:
+        - install-deps
+    image:
+        name: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+        entrypoint: ['']
+    stage: test
+    rules:
+        - if: '$CI_COMMIT_MESSAGE  =~ /^hotfix/'
+          when: never
+        - when: on_success
+    coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+    script:
+        - nohup /bin/bash entrypoint.sh &
+        - npm run test:integration
+        - npm run test:unit
+
+push-production:
+    tags:
+        - docky
+    dependencies: []
+    rules:
+        - if: '$CI_COMMIT_REF_SLUG  == "master"'
+          when: on_success
+    retry:
+        max: 2
+        when:
+            - runner_system_failure
+    stage: push
+    image: docker:stable
+    variables:
+        GIT_STRATEGY: none
+    before_script:
+        - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    script:
+        - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+        - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG $CI_REGISTRY_IMAGE:latest
+        - docker push $CI_REGISTRY_IMAGE:latest
+deploy-production:
+    dependencies: []
+    stage: deploy
+    rules:
+        - if: '$CI_COMMIT_REF_SLUG  == "master"'
+          when: on_success
+    image: ubuntu
+    retry:
+        max: 2
+        when:
+            - runner_system_failure
+    before_script:
+        ##
+        ## Install ssh-agent if not already installed, it is required by Docker.
+        ## (change apt-get to yum if you use an RPM-based image)
+        ##
+        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+        - mkdir -p ~/.ssh
+        - touch ~/.ssh/known_hosts
+        - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+        - chmod 644 ~/.ssh/known_hosts
+        ##
+        ## Run ssh-agent (inside the build environment)
+        ##
+        - eval $(ssh-agent -s)
+
+        ##
+        ## Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store
+        ## We're using tr to fix line endings which makes ed25519 keys work
+        ## without extra base64 encoding.
+        ## https://gitlab.com/gitlab-examples/ssh-private-key/issues/1#note_48526556
+        ##
+        - echo "$SSH_PRIVATE_KEY" > ~/.ssh/pk
+        - chmod 600 ~/.ssh/pk
+        - ssh-add ~/.ssh/pk
+        - ssh-add -l
+        - ls ~/.ssh
+        ##
+        ## Create the SSH directory and give it the right permissions
+        ##
+        - mkdir -p ~/.ssh
+        - chmod 700 ~/.ssh
+    script:
+        - ssh -p $AUX_SSH_PORT gitlab@$AUX_SERVER "cd /master-config/scrapy/ && sh run_docker.sh"

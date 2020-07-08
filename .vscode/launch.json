@@ -1,0 +1,57 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "Attach",
+            "port": 9229
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Test",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "args": ["--no-timeouts", "--colors", "**/${fileBasenameNoExtension}.js"],
+            "internalConsoleOptions": "openOnSessionStart",
+            "openDebug": "openOnDebugBreak",
+            "preLaunchTask": "npm: tsc",
+            "sourceMaps": true,
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "env": {
+                "REDIS_HOST": "127.0.0.1",
+                "PORT": "8111",
+                "NODE_ENV": "test",
+                "NODE_OPTIONS": "--max-http-header-size=50000"
+            }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Project",
+            // we test in `build` to make cleanup fast and easy
+            // "cwd": "${workspaceFolder}/dist",
+            // Replace this with your project root. If there are multiple, you can
+            // automatically run the currently visible file with: "program": ${file}"
+            "program": "${workspaceFolder}/src/app.ts",
+            // "args": ["--no-install"],
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "skipFiles": ["<node_internals>/**/*.js", "${workspaceFolder}/node_modules/**/*.js"],
+            "preLaunchTask": "npm: tsc",
+            "internalConsoleOptions": "openOnSessionStart",
+            "stopOnEntry": true,
+            "smartStep": true,
+            "runtimeArgs": ["--nolazy", "-r", "dotenv/config"],
+            "sourceMaps": true,
+            "env": {
+                "REDIS_HOST": "127.0.0.1",
+                "PORT": "8111",
+                "NODE_OPTIONS": "--max-http-header-size=50000"
+            }
+            // "console": "externalTerminal"
+        }
+    ]
+}

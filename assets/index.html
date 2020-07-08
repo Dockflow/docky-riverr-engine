@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>GraphTP Console</title>
+        <meta name="description" content="" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
+            integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg=="
+            crossorigin="anonymous"
+        ></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/js/bootstrap.min.js"
+            integrity="sha512-I5TkutApDjnWuX+smLIPZNhw+LhTd8WrQhdCKsxCFRSvhFx2km8ZfEpNIhF9nq04msHhOkE8BMOBj5QE07yhMA=="
+            crossorigin="anonymous"
+        ></script>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0-alpha1/css/bootstrap.min.css"
+            integrity="sha512-weZatQD41YXNCVn3Bvl2y1iAZqtH/Y+MlAQUwovog1iwj8cbSEpQMeErMnDp9CBlqIo0oxOcOF8GUEoOZYD4Zg=="
+            crossorigin="anonymous"
+        />
+
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.15.1/cytoscape.min.js"
+            integrity="sha512-1rAJSO1jj2e81BQWO6XgG4Wt5OZNwjemg16yPiG2FvsoHzqgrcuvQ+xt0PX8OauHPb79h8NbUnlY1vBC60Wayg=="
+            crossorigin="anonymous"
+        ></script>
+
+        <script src="cy/cytoscape-cola.js"></script>
+
+        <link rel="stylesheet" href="css/main.css" />
+        <script src="js/main.js"></script>
+    </head>
+    <body>
+        <div class="container-fluid mt-3">
+            <div class="row">
+                <div class="col">
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        style="display: none; float: right;"
+                        id="back_button"
+                    >
+                        Back
+                    </button>
+                    <h1>GraphTP console</h1>
+                    <table id="run_table" class="table table-dark">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                            </tr>
+                        </thead>
+                        <tbody id="run_list"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row" id="run_detail" style="display: none;">
+                <div class="col-6">
+                    <div id="cy" style="border: 1px solid black;"></div>
+                </div>
+                <div class="col-6">
+                    <pre id="detail_json"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="detail_modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Details</h5>
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <pre id="detail"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

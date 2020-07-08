@@ -1,0 +1,47 @@
+import CacheManager from 'cache-manager';
+import RedisStore from 'cache-manager-redis';
+import { config } from '../config';
+import { GraphDump } from '../types/graphDump';
+import { redis } from './redis';
+import { generate } from 'randomstring';
+import { v4 as uuidv4 } from 'uuid';
+
+const keys: string[] = [];
+
+export const GraphCache = CacheManager.caching({
+    store: config.cache.in_memory === true ? 'memory' : RedisStore,
+    host: config.cache.redis.host,
+    port: parseInt(config.cache.redis.port),
+    password: config.cache.redis.password,
+    db: 5,
+    maxRetriesPerRequest: null,
+    tls: config.cache.redis.tls ? {} : undefined,
+    ttl: 60 * 60 * 24, // 24 hours cache
+});
+
+export function saveRun(payload: GraphDump): string {
+    const key = uuidv4();
+    payload.id = key;
+    GraphCache.set(key, payload, {
+        ttl: 24 * 60 * 60,
+    });
+    keys.push(key);
+    return key;
+}
+
+export async function getAll(): Promise<GraphDump[]> {
+    if (keys.length === 0) {
+        return [];
+    }
+
+    let data = [];
+    if (GraphCache.store.mget) {
+        data = await GraphCache.store.mget(...keys);
+    } else {
+        return [];
+    }
+
+    data = data.filter((e: any) => e !== null);
+
+    return data as GraphDump[];
+}
