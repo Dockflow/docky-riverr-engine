@@ -1,7 +1,7 @@
 {
     "name": "graph-tp",
     "version": "0.0.1",
-    "description": "Graph TP",
+    "description": "GraphTP",
     "private": true,
     "main": "dist/app.js",
     "scripts": {

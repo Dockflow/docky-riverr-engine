@@ -151,4 +151,4 @@ deploy-production:
         - mkdir -p ~/.ssh
         - chmod 700 ~/.ssh
     script:
-        - ssh -p $AUX_SSH_PORT gitlab@$AUX_SERVER "cd /master-config/scrapy/ && sh run_docker.sh"
+        - ssh -p $AUX_SSH_PORT gitlab@$AUX_SERVER "cd /master-config/graph-tp/ && sh run_docker.sh"
