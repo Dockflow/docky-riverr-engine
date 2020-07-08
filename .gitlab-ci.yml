@@ -4,7 +4,6 @@ stages:
     - lint
     - build project
     - build image
-    - test
     - push
     - deploy
 
@@ -41,9 +40,12 @@ build-project:
     artifacts:
         paths:
             - dist/
+            - assets/
+            - Dockerfile
     script:
         - npm run tsc
         - cp Dockerfile dist/
+        - cp -R ./assets dist/assets/
 
 build-image:
     tags:
@@ -60,32 +62,8 @@ build-image:
     before_script:
         - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     script:
-        - mv ./dist/Dockerfile ./
-        - mv ./dist/proxy-cert.crt ./
-        - mv ./dist/proxy-cert.pem ./
         - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG .
         - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-
-test-ci:
-    retry:
-        max: 2
-        when:
-            - always
-    dependencies:
-        - install-deps
-    image:
-        name: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-        entrypoint: ['']
-    stage: test
-    rules:
-        - if: '$CI_COMMIT_MESSAGE  =~ /^hotfix/'
-          when: never
-        - when: on_success
-    coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
-    script:
-        - nohup /bin/bash entrypoint.sh &
-        - npm run test:integration
-        - npm run test:unit
 
 push-production:
     tags:
