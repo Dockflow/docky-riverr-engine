@@ -13,10 +13,14 @@ $(document).ready(function () {
         name: 'cose',
 
         // Called on `layoutready`
-        ready: function () {},
+        ready: function () {
+            //
+        },
 
         // Called on `layoutstop`
-        stop: function () {},
+        stop: function () {
+            //
+        },
 
         // Whether to animate while running the layout
         // true : Animate continuously as the layout is running
@@ -106,7 +110,16 @@ $(document).ready(function () {
             console.log(response);
             var trHTML = '';
             $.each(response, function (i, item) {
-                trHTML += '<tr><td><a href="#" data-key=' + item.id + '>' + item.id + '</a></td></tr>';
+                trHTML +=
+                    '<tr><td><a href="#" data-key=' +
+                    item.id +
+                    '>' +
+                    item.id +
+                    '</a></td><td>' +
+                    item.tradeflow_id +
+                    '</td><td>' +
+                    item.run_datetime +
+                    '</td></tr>';
             });
             $('#run_list').append(trHTML);
         },
@@ -123,7 +136,7 @@ $(document).ready(function () {
                 $('#back_button').show();
                 cy.json(response.graph_data);
                 document.getElementById('detail_json').innerHTML = JSON.stringify(response.uotm_message, null, 2);
-                cy.minZoom(1);
+                // cy.minZoom(-5);
                 cy.layout(options).run();
                 $('#cy').css('height', '80vh');
                 cy.resize();

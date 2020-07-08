@@ -12,6 +12,11 @@ export class GraphyServer {
     public app: Application;
     private httpServer: Server;
 
+    private plugins: Array<{
+        pluginType: string;
+        object: GraphyServerPlugin;
+    }> = [];
+
     public constructor() {
         logger.debug('Starting server...');
 
@@ -57,7 +62,20 @@ export class GraphyServer {
 
     public register(plugin: Type<GraphyServerPlugin>): void {
         const pl = new plugin();
+        console.log('Loading plugin', plugin.name);
+        this.plugins.push({
+            object: pl,
+            pluginType: plugin.name,
+        });
         pl.run(this);
+    }
+
+    public plugin<GraphyServerPlugin>(pluginType: Type<GraphyServerPlugin>): GraphyServerPlugin {
+        const found = this.plugins.find((e) => e.pluginType === pluginType.name);
+        if (!found) {
+            throw new Error('Requested plugin ' + pluginType.name + ' was not loaded');
+        }
+        return (found.object as unknown) as GraphyServerPlugin;
     }
 
     public close(): void {

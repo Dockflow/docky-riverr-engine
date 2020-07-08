@@ -50,6 +50,8 @@
                         <thead>
                             <tr>
                                 <th scope="col">#</th>
+                                <th scope="col">tradeflow_id</th>
+                                <th scope="col">run_datetime</th>
                             </tr>
                         </thead>
                         <tbody id="run_list"></tbody>
@@ -57,10 +59,10 @@
                 </div>
             </div>
             <div class="row" id="run_detail" style="display: none;">
-                <div class="col-6">
+                <div class="col-8">
                     <div id="cy" style="border: 1px solid black;"></div>
                 </div>
-                <div class="col-6">
+                <div class="col-4">
                     <pre id="detail_json"></pre>
                 </div>
             </div>
@@ -68,7 +70,7 @@
 
         <!-- Modal -->
         <div class="modal fade" id="detail_modal" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
+            <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">Details</h5>
