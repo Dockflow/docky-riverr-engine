@@ -20,7 +20,7 @@ export const GraphCache = CacheManager.caching({
 export function saveRun(payload: GraphDump): string {
     const key = uuidv4();
     payload.id = key;
-    GraphCache.set(key, JSON.stringify(payload), {
+    GraphCache.set(key, payload, {
         ttl: 12 * 60 * 60,
     });
     keys.push(key);
@@ -39,10 +39,7 @@ export async function getAll(): Promise<GraphDump[]> {
         return [];
     }
 
-    data = data
-        .map(JSON.parse)
-        .filter((e: GraphDump | null) => e !== null)
-        .filter((e: GraphDump) => 'id' in e);
+    data = data.filter((e: GraphDump | null) => e !== null).filter((e: GraphDump) => 'id' in e);
 
     return data as GraphDump[];
 }
