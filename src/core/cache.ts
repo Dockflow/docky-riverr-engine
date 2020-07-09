@@ -23,7 +23,7 @@ export function saveRun(payload: GraphDump): string {
     const key = uuidv4();
     payload.id = key;
     GraphCache.set(key, payload, {
-        ttl: 24 * 60 * 60,
+        ttl: 12 * 60 * 60,
     });
     keys.push(key);
     return key;
@@ -41,7 +41,7 @@ export async function getAll(): Promise<GraphDump[]> {
         return [];
     }
 
-    data = data.filter((e: any) => e !== null);
+    data = data.filter((e: any) => e !== null).filter((e: any) => 'id' in e);
 
     return data as GraphDump[];
 }
