@@ -3,6 +3,7 @@ import RedisStore from 'cache-manager-redis';
 import { config } from '../config';
 import { GraphDump } from '../types/graphDump';
 import { v4 as uuidv4 } from 'uuid';
+import { redis } from './redis';
 
 const keys: string[] = [];
 
@@ -35,6 +36,8 @@ export async function getAll(): Promise<GraphDump[]> {
     let data = [];
     if (GraphCache.store.mget) {
         data = await GraphCache.store.mget(...keys);
+    } else if (typeof redis.mget === 'function') {
+        data = await redis.mget(...keys);
     } else {
         return [];
     }
