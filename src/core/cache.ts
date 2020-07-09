@@ -39,7 +39,16 @@ export async function getAll(): Promise<GraphDump[]> {
         return [];
     }
 
-    data = data.filter((e: GraphDump | null) => e !== null).filter((e: GraphDump) => 'id' in e);
+    data = data
+        .map((e: any) => {
+            if (typeof e === 'string') {
+                return JSON.parse(e);
+            } else {
+                return e;
+            }
+        })
+        .filter((e: GraphDump | null) => e !== null)
+        .filter((e: GraphDump) => 'id' in e);
 
     return data as GraphDump[];
 }
