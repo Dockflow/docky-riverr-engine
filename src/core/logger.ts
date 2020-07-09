@@ -4,7 +4,7 @@ import { config } from '../config';
 export const logger = winston.createLogger({
     level: 'debug',
     defaultMeta: {
-        app: 'docky-scraper',
+        app: 'graphtp',
         environment: config.server.env,
     },
     transports: [],

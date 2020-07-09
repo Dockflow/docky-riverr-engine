@@ -2,8 +2,6 @@ import CacheManager from 'cache-manager';
 import RedisStore from 'cache-manager-redis';
 import { config } from '../config';
 import { GraphDump } from '../types/graphDump';
-import { redis } from './redis';
-import { generate } from 'randomstring';
 import { v4 as uuidv4 } from 'uuid';
 
 const keys: string[] = [];

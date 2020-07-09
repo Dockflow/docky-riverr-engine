@@ -11,7 +11,7 @@ export class InfluxCore implements GraphyServerPlugin {
     }
 
     private async execute(req: Request, res: Response): Promise<void> {
-        fs.writeFileSync('test_ss_.txt', JSON.stringify(req.body));
+        //fs.writeFileSync('test_ss_.txt', JSON.stringify(req.body));
 
         new Orchestrator()
             .execute(req.body)
