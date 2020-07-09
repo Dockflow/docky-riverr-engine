@@ -44,7 +44,6 @@ export async function getAll(): Promise<GraphDump[]> {
 
     data = data
         .map((e: any) => {
-            console.log(typeof e);
             if (typeof e === 'string') {
                 return JSON.parse(e);
             } else {
