@@ -1,6 +1,10 @@
 import cytoscape, { NodeDefinition, EdgeDefinition, NodeSingular } from 'cytoscape';
 
 import { DockyShipmentStatus, Location } from '../types/docky-shipment-status-types';
+import { LocationNode } from './nodes/location-node';
+import { SSEventNode } from './nodes/ss-event-node';
+import { EventAtLocationNode } from './nodes/event-at-location-node';
+import { NodeModel } from './nodes/node-model';
 
 export class StoryBuildingCore {
     public async execute(shipmentStatuses: DockyShipmentStatus[]): Promise<any> {
@@ -12,14 +16,7 @@ export class StoryBuildingCore {
         shipmentStatuses
             .filter((e) => e.location !== null)
             .forEach((ss) => {
-                if (cy.nodes().filter((e) => e.data().location && e.data().location.id == ss.location_id).length > 0) {
-                    // We already have this location in the graph
-                    return;
-                }
-                const node = cy.add({
-                    data: { name: ss.location.name, location: ss.location },
-                    grabbable: true,
-                } as NodeDefinition);
+                LocationNode.firstOrCreate(ss.location, cy);
             });
 
         // Then we add all events that have locations to the correct locations
@@ -27,15 +24,39 @@ export class StoryBuildingCore {
         shipmentStatuses
             .filter((e) => e.location !== null)
             .forEach((ss) => {
-                const location = cy
-                    .nodes()
-                    .filter((e) => e.data().location && e.data().location.id == ss.location_id)
-                    .first();
-                const node = cy.add({
-                    data: { name: ss.message, ss: ss, parent: location?.id() },
-                    grabbable: true,
-                } as NodeDefinition);
+                const location = LocationNode.firstOrCreate(ss.location, cy);
+                SSEventNode.create(ss, { parent: location.id }, cy);
             });
+
+        // Make event-nodes per TU and per location and attach the basic SSs
+        shipmentStatuses
+            .filter(
+                (e) =>
+                    e.location !== null &&
+                    e.transport_unit !== null &&
+                    e.status_code !== null &&
+                    e.status_code.status_code !== '--',
+            )
+            .forEach((ss) => {
+                EventAtLocationNode.createFromShipmentStatus(ss, cy);
+            });
+
+        // Make basic assumptions for these events
+        EventAtLocationNode.all(cy)
+            .map((e) => {
+                e.calculateBasicAttributes();
+                return e;
+            })
+            // .reduce<EventAtLocationNode[]>((carry, e) => {
+            //     carry.push(e);
+            //     return carry;
+            // }, [])
+            .map((e) => {
+                e.connectToNextEvent();
+            });
+
+        // Connect events per TU
+
         return cy.json();
     }
 }

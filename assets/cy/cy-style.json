@@ -4,5 +4,11 @@
         "style": {
             "content": "data(name)"
         }
+    },
+    {
+        "selector": ".EventAtLocationNode",
+        "style": {
+            "background-color": "green"
+        }
     }
 ]
