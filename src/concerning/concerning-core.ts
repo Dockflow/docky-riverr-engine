@@ -1,17 +1,23 @@
-import { UOTMMessage } from '../types/uotm-message';
-import { DockyShipmentStatus } from '../types/docky-shipment-status-types';
 import { sha1 } from 'object-hash';
 
+import { DockyShipmentStatus } from '../types/docky-shipment-status-types';
+import { UOTMMessage } from '../types/uotm-message';
+import { UOTMSegment } from '../types/uotm-segment';
+import { ChangedETAConcern } from './changed-eta-concern';
+
 export class ConcerningCore {
-    public async execute(story: any, shipmentStatuses: DockyShipmentStatus[]): Promise<UOTMMessage> {
+    public async execute(cy: cytoscape.Core, shipmentStatuses: DockyShipmentStatus[]): Promise<UOTMMessage> {
         /**
          * Add the general header with identy-info
          */
         const id = shipmentStatuses[0].tradeflow_id.toString();
+        const segments: UOTMSegment[] = [];
+        //segments.push(...DetentionDemurrageConcern.getSegments(cy, id));
+        segments.push(...ChangedETAConcern.getSegments(cy, id));
 
         const uotm = {
             tradeflow_id: id,
-            segments: [],
+            segments: segments,
             hash: '--placeholder--',
         } as UOTMMessage;
         uotm.hash = sha1(uotm);

@@ -19,6 +19,12 @@ export class LocationNode extends NodeModel {
         return node;
     }
 
+    public static all(cy: cytoscape.Core): LocationNode[] {
+        return NodeModel.allModelDefinitions(this.TYPE, cy).map((e) => {
+            return new this(e, cy);
+        });
+    }
+
     public static firstOrCreate(location: Location, cy: cytoscape.Core): LocationNode {
         const node = cy.nodes().filter((e) => e.data('type') === this.TYPE && e.data().location?.id === location.id);
         return node.length > 0

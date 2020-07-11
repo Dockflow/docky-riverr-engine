@@ -12,15 +12,15 @@ export class Orchestrator {
 
     public async execute(requestBody: { shipment_statuses: any[] }): Promise<void> {
         // Will first make the story
-        const story = await new StoryBuildingCore().execute(requestBody.shipment_statuses);
+        const cy = await new StoryBuildingCore().execute(requestBody.shipment_statuses);
 
         // Then we start concerning
-        const concerns = await new ConcerningCore().execute(story, requestBody.shipment_statuses);
+        const concerns = await new ConcerningCore().execute(cy, requestBody.shipment_statuses);
 
         // Then we save a dump to our database
 
         saveRun({
-            graph_data: story,
+            graph_data: cy.json(),
             uotm_message: concerns,
             run_datetime: new Date().toISOString(),
             run_time: new Date().getTime(),

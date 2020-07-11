@@ -1,5 +1,7 @@
+import { UOTMSegment } from './uotm-segment';
+
 export type UOTMMessage = {
     hash: string;
-    segments: any[];
+    segments: UOTMSegment[];
     tradeflow_id: string;
 };

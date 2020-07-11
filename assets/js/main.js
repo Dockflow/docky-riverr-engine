@@ -134,6 +134,7 @@ $(document).ready(function () {
                 $('#run_table').hide();
                 $('#run_detail').show();
                 $('#back_button').show();
+                cy.reset();
                 cy.json(response.graph_data);
                 document.getElementById('detail_json').innerHTML = JSON.stringify(response.uotm_message, null, 2);
                 // cy.minZoom(-5);

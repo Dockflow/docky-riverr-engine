@@ -7,7 +7,7 @@ import { EventAtLocationNode } from './nodes/event-at-location-node';
 import { NodeModel } from './nodes/node-model';
 
 export class StoryBuildingCore {
-    public async execute(shipmentStatuses: DockyShipmentStatus[]): Promise<any> {
+    public async execute(shipmentStatuses: DockyShipmentStatus[]): Promise<cytoscape.Core> {
         const cy = cytoscape();
 
         /**
@@ -42,21 +42,24 @@ export class StoryBuildingCore {
             });
 
         // Make basic assumptions for these events
+        EventAtLocationNode.all(cy).forEach((e) => {
+            e.calculateBasicAttributes();
+        });
+
+        // If we have the same event happening in a location that is near, then it's prolly the same event
+        EventAtLocationNode.all(cy).forEach((e) => {
+            if (cy.hasElementWithId(e.id)) {
+                e.mergeToMainLocationIfrequired();
+            }
+        });
+
+        // Connect each event to the next event
         EventAtLocationNode.all(cy)
-            .map((e) => {
-                e.calculateBasicAttributes();
-                return e;
-            })
-            // .reduce<EventAtLocationNode[]>((carry, e) => {
-            //     carry.push(e);
-            //     return carry;
-            // }, [])
-            .map((e) => {
+            .sort(EventAtLocationNode.sortByNaturalShipmentOrder)
+            .forEach((e) => {
                 e.connectToNextEvent();
             });
 
-        // Connect events per TU
-
-        return cy.json();
+        return cy;
     }
 }
