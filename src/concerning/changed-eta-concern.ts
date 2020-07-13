@@ -86,7 +86,7 @@ export class ChangedETAConcern {
                 return carry < item ? carry : item;
             });
 
-        const alert = Math.abs(highestDate.diff(lowestDate, 'hours')) > 8;
+        const alert = Math.abs(highestDate.diff(lowestDate, 'hours')) > 12;
         if (!alert) {
             return null;
         }
