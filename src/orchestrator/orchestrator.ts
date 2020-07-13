@@ -4,13 +4,14 @@ import { ConcerningCore } from '../concerning/concerning-core';
 import { saveRun } from '../core/cache';
 import { StoryBuildingCore } from '../story-building/story-building-core';
 import { GraphDump } from '../types/graphDump';
+import { UOTMMessage } from '../types/uotm-message';
 
 export class Orchestrator {
     public constructor() {
         //
     }
 
-    public async execute(requestBody: { shipment_statuses: any[] }): Promise<void> {
+    public async execute(requestBody: { shipment_statuses: any[] }): Promise<UOTMMessage> {
         // Will first make the story
         const cy = await new StoryBuildingCore().execute(requestBody.shipment_statuses);
 
@@ -26,5 +27,7 @@ export class Orchestrator {
             run_time: new Date().getTime(),
             tradeflow_id: concerns.tradeflow_id,
         } as GraphDump);
+
+        return concerns;
     }
 }

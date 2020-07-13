@@ -37,6 +37,12 @@ export class ChangedETAConcern {
         const log = lastVAEALN
             .getIncomingSSEventNodeIds()
             .map((e) => new SSEventNode({ data: cy.$id(e).data() }, cy))
+            .sort((a, b) => {
+                if (a.data.shipment_status.created_at === b.data.shipment_status.created_at) {
+                    return 0;
+                }
+                return moment(a.data.shipment_status.created_at) > moment(b.data.shipment_status.created_at) ? 1 : -1;
+            })
             .reduce((carry, item) => {
                 if (!lastPredicted) {
                     lastPredicted = item.data.shipment_status.event_date;
