@@ -27,7 +27,11 @@ export class ChangedETAConcern {
             .filter((e) => e.data.status_code.status_code === 'VA')
             .filter((e) => {
                 // It cannot have other VA's down the line
-                return e.streamNodes('down').findIndex((e) => e.data.status_code.status_code === 'VA') === -1;
+                console.log(
+                    e.id,
+                    e.streamNodes('downstream').filter((e) => e.data.status_code.status_code === 'VA').length,
+                );
+                return e.streamNodes('downstream').filter((e) => e.data.status_code.status_code === 'VA').length === 0;
             })
             .pop();
 

@@ -332,10 +332,10 @@ export class EventAtLocationNode extends NodeModel {
      * down = further in the transport plan
      * up = earlier in the transport plan
      */
-    public streamNodes(direction: 'up' | 'down'): EventAtLocationNode[] {
+    public streamNodes(direction: 'upstream' | 'downstream'): EventAtLocationNode[] {
         // Make an empty collection
         const nodes: EventAtLocationNode[] = [];
-        const eDirection = direction === 'up' ? 'source' : 'target';
+        const eDirection = direction === 'upstream' ? 'target' : 'source';
         const relevantEdges = this.cy
             .edges()
             .filter(
