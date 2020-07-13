@@ -1,8 +1,9 @@
-import { EventAtLocationNode } from '../story-building/nodes/event-at-location-node';
-import { TransportUnit } from '../types/docky-shipment-status-types';
-import { UOTMChangedETASegment, ChangedETALogEntry } from '../types/uotm-changed-eta-segment';
-import { SSEventNode } from '../story-building/nodes/ss-event-node';
 import moment from 'moment';
+
+import { EventAtLocationNode } from '../story-building/nodes/event-at-location-node';
+import { SSEventNode } from '../story-building/nodes/ss-event-node';
+import { TransportUnit } from '../types/docky-shipment-status-types';
+import { ChangedETALogEntry, UOTMChangedETASegment } from '../types/uotm-changed-eta-segment';
 
 export class ChangedETAConcern {
     public static getSegments(cy: cytoscape.Core, tf_id: string): UOTMChangedETASegment[] {
@@ -95,6 +96,7 @@ export class ChangedETAConcern {
             type: 'ChangedETA',
             alert: alert,
             log: log,
+            location: lastVAEALN.data.location,
             transport_unit: tu,
         };
     }
