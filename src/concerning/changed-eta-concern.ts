@@ -27,11 +27,16 @@ export class ChangedETAConcern {
             .filter((e) => e.data.status_code.status_code === 'VA')
             .filter((e) => {
                 // It cannot have other VA's down the line
-                console.log(
-                    e.id,
-                    e.streamNodes('downstream').filter((e) => e.data.status_code.status_code === 'VA').length,
+                return (
+                    e.streamNodes('downstream').filter((dsn) => dsn.data.status_code.status_code === 'VA').length === 0
                 );
-                return e.streamNodes('downstream').filter((e) => e.data.status_code.status_code === 'VA').length === 0;
+            })
+            .filter((e) => {
+                // It must be actual false or have actuals down the line
+                return (
+                    e.data.actual === false &&
+                    e.streamNodes('downstream').filter((dsn) => dsn.data.actual === true).length === 0
+                );
             })
             .pop();
 
