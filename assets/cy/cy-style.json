@@ -10,5 +10,11 @@
         "style": {
             "background-color": "green"
         }
+    },
+    {
+        "selector": ".LocationBorderNode",
+        "style": {
+            "background-color": "red"
+        }
     }
 ]

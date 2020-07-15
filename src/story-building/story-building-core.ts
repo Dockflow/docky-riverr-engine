@@ -5,6 +5,7 @@ import { LocationNode } from './nodes/location-node';
 import { SSEventNode } from './nodes/ss-event-node';
 import { EventAtLocationNode } from './nodes/event-at-location-node';
 import { NodeModel } from './nodes/node-model';
+import { LocationBorderNode } from './nodes/location-border-node';
 
 export class StoryBuildingCore {
     public async execute(shipmentStatuses: DockyShipmentStatus[]): Promise<cytoscape.Core> {
@@ -58,6 +59,41 @@ export class StoryBuildingCore {
             .sort(EventAtLocationNode.sortByNaturalShipmentOrder)
             .forEach((e) => {
                 e.connectToNextEvent();
+            });
+
+        // Make the LBNs (Location Border Nodes) by walking over each
+        EventAtLocationNode.all(cy)
+            .filter((e) => e.streamNodes('upstream').length === 0)
+            .forEach((e) => {
+                // this means we're looking at a new TP for a specific TU
+                const downStreamNodes = e.streamNodes('downstream');
+                let previousNode = e;
+                let previousLBN: LocationBorderNode | null = null;
+                downStreamNodes.forEach((n) => {
+                    if (n.data.location.id !== previousNode.data.location.id) {
+                        // the previous was an outgoing and we are an incoming
+                        const nout = LocationBorderNode.firstOrCreate('OUT', previousNode, cy);
+                        const nin = LocationBorderNode.firstOrCreate('IN', n, cy);
+
+                        // Connect these nodes
+                        cy.add({
+                            data: {
+                                source: nout.id,
+                                target: nin.id,
+                            },
+                        });
+                        if (previousLBN) {
+                            cy.add({
+                                data: {
+                                    source: previousLBN.id,
+                                    target: nout.id,
+                                },
+                            });
+                        }
+                        previousLBN = nin;
+                    }
+                    previousNode = n;
+                });
             });
 
         return cy;
