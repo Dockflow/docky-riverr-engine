@@ -1,9 +1,6 @@
-import moment from 'moment';
-
 import { EventAtLocationNode } from '../story-building/nodes/event-at-location-node';
-import { SSEventNode } from '../story-building/nodes/ss-event-node';
 import { TransportUnit } from '../types/docky-shipment-status-types';
-import { ChangedETALogEntry, UOTMChangedETASegment } from '../types/uotm-changed-eta-segment';
+import { UOTMChangedETASegment } from '../types/uotm-changed-eta-segment';
 
 export class ContainerMilestonesConcern {
     public static getSegments(cy: cytoscape.Core, tf_id: string): UOTMChangedETASegment[] {
@@ -15,8 +12,6 @@ export class ContainerMilestonesConcern {
             return carry;
         }, [] as TransportUnit[]);
 
-        return transportUnits
-            .map((e) => ChangedETAConcern.getChangedETAs(e, cy))
-            .filter((e) => e !== null) as UOTMChangedETASegment[];
+        return [];
     }
 }

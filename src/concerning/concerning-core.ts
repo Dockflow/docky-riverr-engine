@@ -4,6 +4,7 @@ import { DockyShipmentStatus } from '../types/docky-shipment-status-types';
 import { UOTMMessage } from '../types/uotm-message';
 import { UOTMSegment } from '../types/uotm-segment';
 import { ChangedETAConcern } from './changed-eta-concern';
+import { ContainerMilestonesConcern } from './container-milestones-concern';
 
 export class ConcerningCore {
     public async execute(cy: cytoscape.Core, shipmentStatuses: DockyShipmentStatus[]): Promise<UOTMMessage> {
@@ -14,6 +15,7 @@ export class ConcerningCore {
         const segments: UOTMSegment[] = [];
         //segments.push(...DetentionDemurrageConcern.getSegments(cy, id));
         segments.push(...ChangedETAConcern.getSegments(cy, id));
+        segments.push(...ContainerMilestonesConcern.getSegments(cy, id));
 
         const uotm = {
             tradeflow_id: id,
