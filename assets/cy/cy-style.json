@@ -12,6 +12,12 @@
         }
     },
     {
+        "selector": ".EventAtLocationNode.actual",
+        "style": {
+            "background-color": "black"
+        }
+    },
+    {
         "selector": ".LocationBorderNode",
         "style": {
             "background-color": "red"

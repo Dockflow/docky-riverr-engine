@@ -4,7 +4,7 @@ import { DockyShipmentStatus, Location } from '../types/docky-shipment-status-ty
 import { LocationNode } from './nodes/location-node';
 import { SSEventNode } from './nodes/ss-event-node';
 import { EventAtLocationNode } from './nodes/event-at-location-node';
-import { NodeModel } from './nodes/node-model';
+import { NodeModel, NodeModelDefinition } from './nodes/node-model';
 import { LocationBorderNode } from './nodes/location-border-node';
 
 export class StoryBuildingCore {
@@ -61,6 +61,11 @@ export class StoryBuildingCore {
                 e.connectToNextEvent();
             });
 
+        // Set downstream actuals consistently
+        EventAtLocationNode.all(cy).forEach((e) => {
+            e.setActualsConsitentlyInStream();
+        });
+
         // Make the LBNs (Location Border Nodes) by walking over each
         EventAtLocationNode.all(cy)
             .filter((e) => e.streamNodes('upstream').length === 0)
@@ -95,6 +100,9 @@ export class StoryBuildingCore {
                     previousNode = n;
                 });
             });
+
+        // Apply final styling
+        EventAtLocationNode.all(cy).forEach((e) => e.finalStyling());
 
         return cy;
     }

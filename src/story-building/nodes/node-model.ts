@@ -7,7 +7,7 @@ export type NodeModelDefinition = NodeDefinition & {
     };
 };
 
-export abstract class NodeModel implements NodeDefinition {
+export class NodeModel implements NodeDefinition {
     public id = '';
     public grabbable = true;
     public data: any = {};
@@ -30,9 +30,17 @@ export abstract class NodeModel implements NodeDefinition {
         this.cy = cy;
     }
 
-    public save(data: any): void {
+    public save(
+        data: any,
+        attrs: {
+            classes?: string[];
+        } = {},
+    ): void {
         Object.assign(this.data, data);
         this.cy.elements().$id(this.id).data(this.data);
+        if (attrs.classes) {
+            this.cy.elements().$id(this.id).classes(attrs.classes);
+        }
     }
 
     public static allModelDefinitions(type: string, cy: cytoscape.Core): NodeModelDefinition[] {
@@ -42,5 +50,9 @@ export abstract class NodeModel implements NodeDefinition {
             .map((node) => {
                 return { data: node.data() };
             });
+    }
+
+    public finalStyling(): boolean {
+        return true;
     }
 }

@@ -91,6 +91,20 @@ export class EventAtLocationNode extends NodeModel {
         });
     }
 
+    public finalStyling() {
+        const classes = [EventAtLocationNode.TYPE];
+        if (this.data.actual === true) {
+            classes.push('actual');
+        }
+        this.save(
+            {},
+            {
+                classes: classes,
+            },
+        );
+        return true;
+    }
+
     /**
      * Function will calculate the confidence intervals + event_date + actual true or false
      */
@@ -354,5 +368,22 @@ export class EventAtLocationNode extends NodeModel {
         nodes.push(...eDirectedNode.streamNodes(direction));
 
         return nodes.filter((e) => this.cy.hasElementWithId(e.id));
+    }
+
+    public setActualsConsitentlyInStream() {
+        const downstream = this.streamNodes('downstream');
+        if (downstream.length) {
+            return false;
+        }
+        if (this.data.actual === true) {
+            return false;
+        }
+        if (downstream.filter((e) => e.data.actual === true).length > 0) {
+            this.save({
+                actual: true,
+            });
+            return true;
+        }
+        return false;
     }
 }
