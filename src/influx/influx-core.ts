@@ -19,6 +19,7 @@ export class InfluxCore implements GraphyServerPlugin {
             })
             .catch((e) => {
                 res.json(false);
+                console.log('error', e);
                 res.status(500);
                 res.end();
             });
