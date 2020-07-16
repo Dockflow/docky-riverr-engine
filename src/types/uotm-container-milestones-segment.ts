@@ -1,7 +1,9 @@
-import { TransportUnit, Location, DockyShipmentStatus } from './docky-shipment-status-types';
+import { TransportUnit } from './docky-shipment-status-types';
+import { GroupedMilestones } from './grouped-milestone-types';
 
-export type UOTMChangedETASegment = {
+export type UOTMContainerMilestonesSegment = {
     type: 'ContainerMilestones';
     transport_unit: TransportUnit;
-    log: any[];
+    tradeflow_id: string;
+    log: GroupedMilestones;
 };

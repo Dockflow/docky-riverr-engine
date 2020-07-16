@@ -14,8 +14,8 @@ export class ConcerningCore {
         const id = shipmentStatuses[0].tradeflow_id.toString();
         const segments: UOTMSegment[] = [];
         //segments.push(...DetentionDemurrageConcern.getSegments(cy, id));
-        segments.push(...ChangedETAConcern.getSegments(cy, id));
         segments.push(...ContainerMilestonesConcern.getSegments(cy, id));
+        segments.push(...ChangedETAConcern.getSegments(cy, id));
 
         const uotm = {
             tradeflow_id: id,

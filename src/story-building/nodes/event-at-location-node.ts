@@ -1,11 +1,10 @@
-import cytoscape, { EdgeDefinition, EdgeCollection, NodeCollection } from 'cytoscape';
+import cytoscape, { EdgeCollection, EdgeDefinition } from 'cytoscape';
 
-import { Location, StatusCode, TransportUnit, DockyShipmentStatus } from '../../types/docky-shipment-status-types';
-import { NodeModel, NodeModelDefinition } from './node-model';
-import { LocationNode } from './location-node';
-import { SSEventNode } from './ss-event-node';
 import { DistanceCalculator } from '../../core/distance-calculator';
-import { FileTransportOptions } from 'winston/lib/winston/transports';
+import { DockyShipmentStatus, Location, StatusCode, TransportUnit } from '../../types/docky-shipment-status-types';
+import { LocationNode } from './location-node';
+import { NodeModel, NodeModelDefinition } from './node-model';
+import { SSEventNode } from './ss-event-node';
 
 export type EventAtLocationKeyData = {
     status_code: StatusCode;
@@ -13,11 +12,11 @@ export type EventAtLocationKeyData = {
     transport_unit: TransportUnit;
 };
 
-type EventDateLogEntry = {
+export type EventDateLogEntry = {
     event_date: string;
     predicted_at: string;
     actual: boolean;
-    source_shipment_statuses: DockyShipmentStatus;
+    source_shipment_status?: DockyShipmentStatus;
 };
 
 export class EventAtLocationNode extends NodeModel {
@@ -37,6 +36,7 @@ export class EventAtLocationNode extends NodeModel {
                 data: {
                     type: this.TYPE,
                     name: creationData.status_code.message,
+                    message: creationData.status_code.message,
                     ...creationData,
                     parent: LocationNode.firstOrCreate(creationData.location, cy).id,
                 },
@@ -127,7 +127,7 @@ export class EventAtLocationNode extends NodeModel {
                     actual: ssNode.data().shipment_status.actual,
                     event_date: ssNode.data().shipment_status.event_date,
                     predicted_at: ssNode.data().shipment_status.created_at,
-                    source_shipment_statuses: ssNode.data().shipment_status.shipment_status,
+                    source_shipment_status: ssNode.data().shipment_status,
                 });
             });
 
@@ -354,7 +354,7 @@ export class EventAtLocationNode extends NodeModel {
 
     private streamNodesNoStack(
         direction: 'upstream' | 'downstream',
-        parentNodes: { nodes: EventAtLocationNode[] } | null = null,
+        parentNodes: { nodes: EventAtLocationNode[] },
     ): void {
         const eDirection = direction === 'upstream' ? 'target' : 'source';
         const relevantEdges = this.cy
@@ -368,6 +368,7 @@ export class EventAtLocationNode extends NodeModel {
         const otherNodeId = relevantEdges.first().data()[eDirection === 'source' ? 'target' : 'source'];
         // console.log('other', this.cy.$id(otherNodeId).data());
         const eDirectedNode = new EventAtLocationNode({ data: this.cy.$id(otherNodeId).data() }, this.cy);
+        parentNodes.nodes.push(eDirectedNode);
         eDirectedNode.streamNodesNoStack(direction, parentNodes);
     }
 
