@@ -362,6 +362,9 @@ export class EventAtLocationNode extends NodeModel {
         // console.log('other', this.cy.$id(otherNodeId).data());
         const eDirectedNode = new EventAtLocationNode({ data: this.cy.$id(otherNodeId).data() }, this.cy);
 
+        if (nodes.find((e) => e.id === eDirectedNode.id)) {
+            return nodes;
+        }
         nodes.push(eDirectedNode);
 
         // Also push the streamedNodes from this node - recursive
