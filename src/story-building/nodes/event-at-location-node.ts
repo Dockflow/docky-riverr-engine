@@ -347,8 +347,15 @@ export class EventAtLocationNode extends NodeModel {
      * up = earlier in the transport plan
      */
     public streamNodes(direction: 'upstream' | 'downstream'): EventAtLocationNode[] {
-        // Make an empty collection
-        const nodes: EventAtLocationNode[] = [];
+        const init: { nodes: EventAtLocationNode[] } = { nodes: [] };
+        this.streamNodesNoStack(direction, init);
+        return init.nodes;
+    }
+
+    private streamNodesNoStack(
+        direction: 'upstream' | 'downstream',
+        parentNodes: { nodes: EventAtLocationNode[] } | null = null,
+    ): void {
         const eDirection = direction === 'upstream' ? 'target' : 'source';
         const relevantEdges = this.cy
             .edges()
@@ -356,24 +363,15 @@ export class EventAtLocationNode extends NodeModel {
                 (e) => e.data().type === EventAtLocationNode.NEXT_EVENT_EALN_EDGE && e.data()[eDirection] === this.id,
             );
         if (relevantEdges.length === 0) {
-            return nodes;
+            return;
         }
         const otherNodeId = relevantEdges.first().data()[eDirection === 'source' ? 'target' : 'source'];
         // console.log('other', this.cy.$id(otherNodeId).data());
         const eDirectedNode = new EventAtLocationNode({ data: this.cy.$id(otherNodeId).data() }, this.cy);
-
-        if (nodes.find((e) => e.id === eDirectedNode.id)) {
-            return nodes;
-        }
-        nodes.push(eDirectedNode);
-
-        // Also push the streamedNodes from this node - recursive
-        nodes.push(...eDirectedNode.streamNodes(direction));
-
-        return nodes.filter((e) => this.cy.hasElementWithId(e.id));
+        eDirectedNode.streamNodesNoStack(direction, parentNodes);
     }
 
-    public setActualsConsitentlyInStream() {
+    public setActualsConsitentlyInStream(): boolean {
         const downstream = this.streamNodes('downstream');
         if (downstream.length) {
             return false;
