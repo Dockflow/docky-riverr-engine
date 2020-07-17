@@ -33,10 +33,8 @@ export class ContainerMilestonesConcern {
             .sort((a, b) => {
                 const aCount = a.streamNodes('downstream').length;
                 const bCount = b.streamNodes('downstream').length;
-                if (aCount === bCount) {
-                    return 0;
-                }
-                return aCount > bCount ? 1 : -1;
+
+                return bCount - aCount;
             })
             .shift();
 
