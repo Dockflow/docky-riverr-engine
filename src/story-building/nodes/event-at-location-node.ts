@@ -290,7 +290,7 @@ export class EventAtLocationNode extends NodeModel {
         }
 
         // Catch ties -> choose the one with the lowest location_id
-        return this.data.location.id < ealn.data().locaton.id;
+        return this.data.location.id < ealn.data.locaton.id;
     }
 
     /**
