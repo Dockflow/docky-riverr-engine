@@ -347,15 +347,19 @@ export class EventAtLocationNode extends NodeModel {
      * up = earlier in the transport plan
      */
     public streamNodes(direction: 'upstream' | 'downstream'): EventAtLocationNode[] {
-        const init: { nodes: EventAtLocationNode[] } = { nodes: [] };
+        const init: { depth: number; nodes: EventAtLocationNode[] } = { depth: 0, nodes: [] };
         this.streamNodesNoStack(direction, init);
         return init.nodes;
     }
 
     private streamNodesNoStack(
         direction: 'upstream' | 'downstream',
-        parentNodes: { nodes: EventAtLocationNode[] },
+        parentNodes: { depth: number; nodes: EventAtLocationNode[] },
     ): void {
+        if (parentNodes.depth > 100) {
+            // shortcircuit break
+            return;
+        }
         const eDirection = direction === 'upstream' ? 'target' : 'source';
         const relevantEdges = this.cy
             .edges()
@@ -369,6 +373,7 @@ export class EventAtLocationNode extends NodeModel {
         // console.log('other', this.cy.$id(otherNodeId).data());
         const eDirectedNode = new EventAtLocationNode({ data: this.cy.$id(otherNodeId).data() }, this.cy);
         parentNodes.nodes.push(eDirectedNode);
+        parentNodes.depth++;
         eDirectedNode.streamNodesNoStack(direction, parentNodes);
     }
 
