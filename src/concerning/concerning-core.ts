@@ -11,7 +11,8 @@ export class ConcerningCore {
         /**
          * Add the general header with identy-info
          */
-        const id = shipmentStatuses[0].tradeflow_id.toString();
+
+        const id = shipmentStatuses.length > 0 ? shipmentStatuses[0].tradeflow_id.toString() : null;
         const segments: UOTMSegment[] = [];
         //segments.push(...DetentionDemurrageConcern.getSegments(cy, id));
         segments.push(...ContainerMilestonesConcern.getSegments(cy, id));
