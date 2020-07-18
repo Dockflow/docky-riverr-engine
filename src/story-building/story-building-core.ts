@@ -62,9 +62,9 @@ export class StoryBuildingCore {
             });
 
         // Set downstream actuals consistently
-        EventAtLocationNode.all(cy).forEach((e) => {
-            e.setActualsConsitentlyInStream();
-        });
+        // EventAtLocationNode.all(cy).forEach((e) => {
+        //     e.setActualsConsitentlyInStream();
+        // });
 
         // Make the LBNs (Location Border Nodes) by walking over each
         EventAtLocationNode.all(cy)

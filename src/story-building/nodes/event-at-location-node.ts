@@ -26,11 +26,24 @@ export class EventAtLocationNode extends NodeModel {
 
     public static naturalOrder = ['GE', 'GN', 'AE', 'VD', 'VA', 'UV', 'GT', 'GR'];
 
+    public static statusCodeConversions = [
+        {
+            original: 'L',
+            means: 'AE',
+        },
+    ];
+
     // public location: Location | null = null;
     // public status_code: StatusCode | null = null;
     // public transport_unit: TransportUnit | null = null;
 
     public static create(creationData: EventAtLocationKeyData, cy: cytoscape.Core): EventAtLocationNode {
+        const replacement = EventAtLocationNode.statusCodeConversions.find(
+            (e) => e.original === creationData.status_code.status_code,
+        );
+        if (replacement) {
+            creationData.status_code.status_code = replacement.means;
+        }
         const node = new this(
             {
                 data: {
@@ -377,20 +390,20 @@ export class EventAtLocationNode extends NodeModel {
         eDirectedNode.streamNodesNoStack(direction, parentNodes);
     }
 
-    public setActualsConsitentlyInStream(): boolean {
-        const downstream = this.streamNodes('downstream');
-        if (downstream.length) {
-            return false;
-        }
-        if (this.data.actual === true) {
-            return false;
-        }
-        if (downstream.filter((e) => e.data.actual === true).length > 0) {
-            this.save({
-                actual: true,
-            });
-            return true;
-        }
-        return false;
-    }
+    // public setActualsConsitentlyInStream(): boolean {
+    //     const downstream = this.streamNodes('downstream');
+    //     if (downstream.length) {
+    //         return false;
+    //     }
+    //     if (this.data.actual === true) {
+    //         return false;
+    //     }
+    //     if (downstream.filter((e) => e.data.actual === true).length > 0) {
+    //         this.save({
+    //             actual: true,
+    //         });
+    //         return true;
+    //     }
+    //     return false;
+    // }
 }
