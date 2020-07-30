@@ -17,7 +17,7 @@ export class ConcerningCore {
         if (id) {
             //segments.push(...DetentionDemurrageConcern.getSegments(cy, id));
             segments.push(...ContainerMilestonesConcern.getSegments(cy, id));
-            segments.push(...ChangedETAConcern.getSegments(cy, id));
+            segments.push(...ChangedETAConcern.getSegments(cy));
         }
 
         const uotm = {

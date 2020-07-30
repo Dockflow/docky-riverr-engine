@@ -4,9 +4,10 @@ import { EventAtLocationNode } from '../story-building/nodes/event-at-location-n
 import { SSEventNode } from '../story-building/nodes/ss-event-node';
 import { TransportUnit } from '../types/docky-shipment-status-types';
 import { ChangedETALogEntry, UOTMChangedETASegment } from '../types/uotm-changed-eta-segment';
+import cytoscape from 'cytoscape';
 
 export class ChangedETAConcern {
-    public static getSegments(cy: cytoscape.Core, tf_id: string): UOTMChangedETASegment[] {
+    public static getSegments(cy: cytoscape.Core): UOTMChangedETASegment[] {
         // For each TU that is handled in the story, we'll make a TUDDCondition
         const transportUnits = EventAtLocationNode.all(cy).reduce((carry, item) => {
             if (carry.findIndex((e) => item.data.transport_unit && e.id === item.data.transport_unit.id) === -1) {
@@ -107,6 +108,7 @@ export class ChangedETAConcern {
             log: log,
             location: lastVAEALN.data.location,
             transport_unit: tu,
+            delta_in_seconds: highestDate.diff(lowestDate, 'seconds'),
         };
     }
 }
