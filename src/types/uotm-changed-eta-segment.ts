@@ -9,4 +9,5 @@ export type UOTMChangedETASegment = {
     transport_unit: TransportUnit;
     location: Location;
     log: ChangedETALogEntry[];
+    delta_in_seconds: number;
 };
