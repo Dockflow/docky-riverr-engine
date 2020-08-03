@@ -111,11 +111,12 @@ function getCY() {
     return cy;
 }
 
-$(document).ready(function () {
+function loadList() {
     $.ajax({
         url: '/list/',
         type: 'GET',
         success: function (response) {
+            $('#run_list').html('');
             console.log(response);
             var trHTML = '';
             $.each(response, function (i, item) {
@@ -133,7 +134,10 @@ $(document).ready(function () {
             $('#run_list').append(trHTML);
         },
     });
+}
 
+$(document).ready(function () {
+    loadList();
     $(document).on('click', '#run_list a', function () {
         $.ajax({
             url: '/get',
@@ -160,6 +164,36 @@ $(document).ready(function () {
                     $('#detail_modal').modal('show');
                     document.getElementById('detail').innerHTML = JSON.stringify(e.target.data(), null, 2);
                     return false;
+                });
+            },
+        });
+
+        return false;
+    });
+
+    $(document).on('click', '#tf_request', function () {
+        $('input,button').attr('disabled', true);
+        $.ajax({
+            url: $('#req_url').val() + '/api/graphtp-trigger-export',
+            data: JSON.stringify({
+                tradeflow_id: $('#req_tradeflow_id').val(),
+                token: $('#req_key').val(),
+            }),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            type: 'POST',
+            success: function (response) {
+                console.log('requested', response);
+                $.ajax({
+                    url: location.protocol + '//' + location.host + '/request-uotm-message',
+                    data: JSON.stringify(response),
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    type: 'POST',
+                    success: function (re) {
+                        loadList();
+                        $('input,button').removeAttr('disabled');
+                    },
                 });
             },
         });

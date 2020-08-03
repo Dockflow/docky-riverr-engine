@@ -33,11 +33,12 @@ export async function getAll(): Promise<GraphDump[]> {
         return [];
     }
 
+    const keysToGet = keys.slice(-200).reverse();
     let data = [];
     if (GraphCache.store.mget) {
-        data = await GraphCache.store.mget(...keys);
+        data = await GraphCache.store.mget(...keysToGet);
     } else if (typeof redis.mget === 'function') {
-        data = await redis.mget(...keys);
+        data = await redis.mget(...keysToGet);
     } else {
         return [];
     }
