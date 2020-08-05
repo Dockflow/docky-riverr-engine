@@ -22,7 +22,7 @@ export function saveRun(payload: GraphDump): string {
     const key = uuidv4();
     payload.id = key;
     GraphCache.set(key, payload, {
-        ttl: 12 * 60 * 60,
+        ttl: 1 * 60 * 60,
     });
     keys.push(key);
     return key;
