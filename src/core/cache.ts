@@ -15,7 +15,7 @@ export const GraphCache = CacheManager.caching({
     db: 5,
     maxRetriesPerRequest: null,
     tls: config.cache.redis.tls ? {} : undefined,
-    ttl: 60 * 60 * 24, // 24 hours cache
+    ttl: 60 * 60 * 1, // 1 hour cache
 });
 
 export function saveRun(payload: GraphDump): string {
