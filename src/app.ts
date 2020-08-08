@@ -21,5 +21,5 @@ if (config.server.env === 'test') {
     new Orchestrator().execute(JSON.parse(fs.readFileSync('assets/test_files/test_ss_7.txt').toString()));
     new Orchestrator().execute(JSON.parse(fs.readFileSync('assets/test_files/test_ss_8.txt').toString()));
     new Orchestrator().execute(JSON.parse(fs.readFileSync('assets/test_files/test_ss_9.txt').toString()));
-    new Orchestrator().execute(JSON.parse(fs.readFileSync('assets/test_files/test_ss_10.txt').toString()));
+    //new Orchestrator().execute(JSON.parse(fs.readFileSync('assets/test_files/test_ss_11.txt').toString()));
 }

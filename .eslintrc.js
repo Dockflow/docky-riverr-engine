@@ -21,5 +21,6 @@ module.exports = {
         // Allow snake_case for properties, enforce camelCase for variables
         // '@typescript-eslint/camelcase': [2, { properties: 'never' }],
         '@typescript-eslint/no-unused-vars': [1, { argsIgnorePattern: '^_' }],
+        '@typescript-eslint/no-non-null-assertion': 'off',
     },
 };

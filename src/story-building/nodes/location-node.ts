@@ -1,4 +1,4 @@
-import cytoscape, { NodeDefinition } from 'cytoscape';
+import cytoscape from 'cytoscape';
 
 import { Location } from '../../types/docky-shipment-status-types';
 import { NodeModel, NodeModelDefinition } from './node-model';

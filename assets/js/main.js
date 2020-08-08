@@ -107,7 +107,6 @@ function getCY() {
         container: container,
     });
     cy.style(style);
-    console.log(cy);
     return cy;
 }
 
@@ -178,6 +177,8 @@ $(document).ready(function () {
             data: JSON.stringify({
                 tradeflow_id: $('#req_tradeflow_id').val(),
                 token: $('#req_key').val(),
+                delay: $('#req_delay').val(),
+                number: $('#req_etaevent_number').val(),
             }),
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',

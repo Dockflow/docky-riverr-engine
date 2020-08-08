@@ -1,4 +1,5 @@
 import { NodeDefinition } from 'cytoscape';
+import { DataObject } from '../../types/data-object';
 
 export type NodeModelDefinition = NodeDefinition & {
     data: {
@@ -10,10 +11,11 @@ export type NodeModelDefinition = NodeDefinition & {
 export class NodeModel implements NodeDefinition {
     public id = '';
     public grabbable = true;
-    public data: any = {};
+    public data: DataObject;
     public cy: cytoscape.Core;
 
     constructor(definition: NodeModelDefinition, cy: cytoscape.Core) {
+        this.data = definition.data;
         Object.assign(this, definition);
         Object.assign(this, definition.data);
         this.data.graph_source = 'NodeModel';
@@ -31,7 +33,7 @@ export class NodeModel implements NodeDefinition {
     }
 
     public save(
-        data: any,
+        data: DataObject,
         attrs: {
             classes?: string[];
         } = {},

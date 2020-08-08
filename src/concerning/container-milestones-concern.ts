@@ -2,9 +2,10 @@ import { EventAtLocationNode, EventDateLogEntry } from '../story-building/nodes/
 import { TransportUnit } from '../types/docky-shipment-status-types';
 import { GroupedMilestones, MilestoneEvent } from '../types/grouped-milestone-types';
 import { UOTMContainerMilestonesSegment } from '../types/uotm-container-milestones-segment';
+import { ExecutionContext } from '../types/execution-context';
 
 export class ContainerMilestonesConcern {
-    public static getSegments(cy: cytoscape.Core, tf_id: string): UOTMContainerMilestonesSegment[] {
+    public static getSegments(cy: cytoscape.Core, execContext: ExecutionContext): UOTMContainerMilestonesSegment[] {
         // For each TU that is handled in the story, we'll make a ContainerMileStoneSegment
         const transportUnits = EventAtLocationNode.all(cy).reduce((carry, item) => {
             if (carry.findIndex((e) => item.data.transport_unit && e.id === item.data.transport_unit.id) === -1) {
@@ -14,14 +15,14 @@ export class ContainerMilestonesConcern {
         }, [] as TransportUnit[]);
 
         return transportUnits
-            .map((e) => ContainerMilestonesConcern.getTUDDCondition(e, tf_id, cy))
+            .map((e) => ContainerMilestonesConcern.getTUDDCondition(e, cy, execContext))
             .filter((e) => e !== null) as UOTMContainerMilestonesSegment[];
     }
 
     public static getTUDDCondition(
         tu: TransportUnit,
-        tfId: string,
         cy: cytoscape.Core,
+        execContext: ExecutionContext,
     ): UOTMContainerMilestonesSegment | null {
         const log: GroupedMilestones = {
             milestones: [],
@@ -60,7 +61,7 @@ export class ContainerMilestonesConcern {
         });
 
         return {
-            tradeflow_id: tfId,
+            tradeflow_id: execContext.tradeflow_id,
             type: 'ContainerMilestones',
             transport_unit: tu,
             log: log,

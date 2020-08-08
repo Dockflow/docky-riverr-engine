@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 
 import { GraphyServer } from '../core/server';
 import { Orchestrator } from '../orchestrator/orchestrator';
+import { RequestContext } from '../types/execution-context';
 import { GraphyServerPlugin } from '../types/graphyServerPlugin';
 
 export class InfluxCore implements GraphyServerPlugin {
@@ -11,7 +12,7 @@ export class InfluxCore implements GraphyServerPlugin {
 
     private async execute(req: Request, res: Response): Promise<void> {
         new Orchestrator()
-            .execute(req.body)
+            .execute(req.body as RequestContext)
             .then((result) => {
                 res.json(result);
                 res.status(200);

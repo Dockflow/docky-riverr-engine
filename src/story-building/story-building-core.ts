@@ -1,20 +1,18 @@
-import cytoscape, { NodeDefinition, EdgeDefinition, NodeSingular } from 'cytoscape';
+import cytoscape from 'cytoscape';
 
-import { DockyShipmentStatus, Location } from '../types/docky-shipment-status-types';
+import { ExecutionContext } from '../types/execution-context';
+import { EventAtLocationNode } from './nodes/event-at-location-node';
+import { LocationBorderNode } from './nodes/location-border-node';
 import { LocationNode } from './nodes/location-node';
 import { SSEventNode } from './nodes/ss-event-node';
-import { EventAtLocationNode } from './nodes/event-at-location-node';
-import { NodeModel, NodeModelDefinition } from './nodes/node-model';
-import { LocationBorderNode } from './nodes/location-border-node';
 
 export class StoryBuildingCore {
-    public async execute(shipmentStatuses: DockyShipmentStatus[]): Promise<cytoscape.Core> {
+    public async execute(execContext: ExecutionContext): Promise<cytoscape.Core> {
         const cy = cytoscape();
-
         /**
          * First we will add all locations
          */
-        shipmentStatuses
+        execContext.shipment_statuses
             .filter((e) => e.location !== null)
             .forEach((ss) => {
                 LocationNode.firstOrCreate(ss.location, cy);
@@ -22,7 +20,7 @@ export class StoryBuildingCore {
 
         // Then we add all events that have locations to the correct locations
 
-        shipmentStatuses
+        execContext.shipment_statuses
             .filter((e) => e.location !== null)
             .forEach((ss) => {
                 const location = LocationNode.firstOrCreate(ss.location, cy);
@@ -30,7 +28,7 @@ export class StoryBuildingCore {
             });
 
         // Make event-nodes per TU and per location and attach the basic SSs
-        shipmentStatuses
+        execContext.shipment_statuses
             .filter(
                 (e) =>
                     e.location !== null &&

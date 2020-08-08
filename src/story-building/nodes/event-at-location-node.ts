@@ -104,7 +104,7 @@ export class EventAtLocationNode extends NodeModel {
         });
     }
 
-    public finalStyling() {
+    public finalStyling(): boolean {
         const classes = [EventAtLocationNode.TYPE];
         if (this.data.actual === true) {
             classes.push('actual');
