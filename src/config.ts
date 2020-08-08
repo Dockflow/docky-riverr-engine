@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import { ExecutionConfiguration } from './types/execution-configuration';
 dotenv.config();
 
 export const config = {
@@ -26,4 +27,8 @@ export const config = {
                     : false,
         },
     },
+    default_configuration: {
+        eta_changed_limit: 3,
+        eta_delay_in_hours: 12,
+    } as ExecutionConfiguration,
 };

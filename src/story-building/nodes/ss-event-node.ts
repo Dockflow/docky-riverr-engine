@@ -1,11 +1,12 @@
-import cytoscape, { NodeDefinition } from 'cytoscape';
+import cytoscape from 'cytoscape';
 
+import { DataObject } from '../../types/data-object';
 import { DockyShipmentStatus } from '../../types/docky-shipment-status-types';
 import { NodeModel, NodeModelDefinition } from './node-model';
 
 export class SSEventNode extends NodeModel {
     public static TYPE = 'SSEventNode';
-    public static create(ss: DockyShipmentStatus, additional_data: any, cy: cytoscape.Core) {
+    public static create(ss: DockyShipmentStatus, additional_data: DataObject, cy: cytoscape.Core): SSEventNode {
         const node = new this(
             {
                 data: {

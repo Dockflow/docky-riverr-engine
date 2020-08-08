@@ -3,6 +3,10 @@ import * as fs from 'fs';
 
 (async (): Promise<void> => {
     new Orchestrator().execute({
-        shipment_statuses: JSON.parse(fs.readFileSync('test_ss.txt').toString()),
+        ...JSON.parse(fs.readFileSync('test_ss.txt').toString()),
+        config: {
+            eta_changed_limit: 3,
+            eta_delay_in_hours: 12,
+        },
     });
 })();

@@ -1,25 +1,25 @@
-import { Request, Response } from 'express';
-
 import { ConcerningCore } from '../concerning/concerning-core';
 import { saveRun } from '../core/cache';
 import { StoryBuildingCore } from '../story-building/story-building-core';
+import { ExecutionContext, RequestContext } from '../types/execution-context';
 import { GraphDump } from '../types/graphDump';
 import { UOTMMessage } from '../types/uotm-message';
+import { config } from '../config';
 
 export class Orchestrator {
-    public constructor() {
-        //
-    }
+    public async execute(requestBody: RequestContext): Promise<UOTMMessage> {
+        const execContext: ExecutionContext = {
+            ...requestBody,
+            config: requestBody.config ?? config.default_configuration,
+        };
 
-    public async execute(requestBody: { shipment_statuses: any[] }): Promise<UOTMMessage> {
         // Will first make the story
-        const cy = await new StoryBuildingCore().execute(requestBody.shipment_statuses);
+        const cy = await new StoryBuildingCore().execute(execContext);
 
         // Then we start concerning
-        const concerns = await new ConcerningCore().execute(cy, requestBody.shipment_statuses);
+        const concerns = await new ConcerningCore().execute(cy, execContext);
 
         // Then we save a dump to our database
-
         saveRun({
             graph_data: cy.json(),
             uotm_message: concerns,

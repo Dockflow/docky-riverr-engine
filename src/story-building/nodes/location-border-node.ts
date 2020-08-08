@@ -1,9 +1,9 @@
 import cytoscape from 'cytoscape';
 
 import { Location, TransportUnit } from '../../types/docky-shipment-status-types';
-import { NodeModel, NodeModelDefinition } from './node-model';
 import { EventAtLocationNode } from './event-at-location-node';
 import { LocationNode } from './location-node';
+import { NodeModel, NodeModelDefinition } from './node-model';
 
 export type MoveType = 'IN' | 'OUT';
 export type LocationBorderNodeCharacteristics = {
@@ -15,9 +15,7 @@ export type LocationBorderNodeCharacteristics = {
 export class LocationBorderNode extends NodeModel {
     public static TYPE = 'LocationBorderNode';
 
-    public data: any & LocationBorderNodeCharacteristics;
-
-    public static create(keyData: LocationBorderNodeCharacteristics, cy: cytoscape.Core) {
+    public static create(keyData: LocationBorderNodeCharacteristics, cy: cytoscape.Core): LocationBorderNode {
         const node = new this(
             {
                 data: {
@@ -35,7 +33,7 @@ export class LocationBorderNode extends NodeModel {
         return node;
     }
 
-    public static firstOrCreate(mt: MoveType, ealn: EventAtLocationNode, cy: cytoscape.Core) {
+    public static firstOrCreate(mt: MoveType, ealn: EventAtLocationNode, cy: cytoscape.Core): LocationBorderNode {
         const node = cy
             .nodes()
             .filter((e) => e.data('type') === this.TYPE)

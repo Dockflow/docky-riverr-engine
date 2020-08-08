@@ -1,8 +1,9 @@
+import express, { Request, Response } from 'express';
+
+import { getAll, GraphCache } from '../core/cache';
 import { GraphyServer } from '../core/server';
 import { GraphyServerPlugin } from '../types/graphyServerPlugin';
-import express, { Request, Response } from 'express';
-import { getAll, saveRun, GraphCache } from '../core/cache';
-import { GraphDump } from '../types/graphDump';
+
 export class DisplayCore implements GraphyServerPlugin {
     public run(server: GraphyServer): void {
         server.app.get('/list', this.list);

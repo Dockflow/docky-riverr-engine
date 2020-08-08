@@ -32,6 +32,7 @@ lint-project:
     script:
         - npm run test:lint
         - npm run test:pretty
+        - npm run test:spec
 
 build-project:
     dependencies:

@@ -1,5 +1,6 @@
 import * as winston from 'winston';
 import { config } from '../config';
+import * as winstonlogzio from 'winston-logzio';
 
 export const logger = winston.createLogger({
     level: 'debug',
@@ -11,10 +12,7 @@ export const logger = winston.createLogger({
 });
 
 if (config.logging.logzio.enabled === true) {
-    // eslint-disable-next-line
-    const LogzioWinstonTransport = require('winston-logzio');
-
-    const logzioWinstonTransport = new LogzioWinstonTransport({
+    const logzioWinstonTransport = new winstonlogzio.default({
         name: 'winston_logzio',
         host: 'listener-nl.logz.io',
         token: config.logging.logzio.token,

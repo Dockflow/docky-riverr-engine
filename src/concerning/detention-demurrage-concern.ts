@@ -15,7 +15,7 @@ export class DetentionDemurrageConcern {
         return transportUnits.map((e) => DetentionDemurrageConcern.getTUDDCondition(e, tf_id, cy));
     }
 
-    public static getTUDDCondition(tu: TransportUnit, tf_id: string, cy: cytoscape.Core): UOTMTUDDSegment {
+    public static getTUDDCondition(tu: TransportUnit, tf_id: string, _cy: cytoscape.Core): UOTMTUDDSegment {
         return {
             type: 'TUDD',
             tf_id: tf_id,
