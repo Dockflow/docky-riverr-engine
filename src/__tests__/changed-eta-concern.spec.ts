@@ -17,11 +17,11 @@ describe('ETA changed concern ', () => {
 
     it('changed eta concern instance without params', () => {
         const changedETAConcern = new ChangedETAConcern();
-        assert.ok(true);
+        assert.ok(changedETAConcern);
     });
 
     it('changed eta instance with params', () => {
         const changedETAConcern = new ChangedETAConcern();
+        assert.ok(changedETAConcern);
     });
-    it('changed eta concern get first event of last location', () => {});
 });
