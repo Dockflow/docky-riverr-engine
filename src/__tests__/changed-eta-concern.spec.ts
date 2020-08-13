@@ -48,8 +48,8 @@ describe('ETA changed concern ', () => {
             cy,
         );
 
-        assert.ok(lastLocationEvent?.data.name === 'discharg');
-        assert.ok(lastLocationEvent?.data.status_code.id === 6130);
+        assert.strictEqual(lastLocationEvent?.data.name, 'discharg');
+        assert.strictEqual(lastLocationEvent?.data.status_code.id, 6130);
     });
 
     it('changed eta get tu alerts ', async () => {
