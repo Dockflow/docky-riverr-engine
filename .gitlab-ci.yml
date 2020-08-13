@@ -34,17 +34,6 @@ lint-project:
         - npm run test:pretty
         - npm run test:spec
 
-test-project:
-    dependencies:
-        - install-deps
-    stage: test
-    rules:
-        - if: "$CI_COMMIT_MESSAGE  =~ /^hotfix/"
-          when: never
-        - when: on_success
-    script:
-        - npm run test:spec
-
 build-project:
     dependencies:
         - install-deps
