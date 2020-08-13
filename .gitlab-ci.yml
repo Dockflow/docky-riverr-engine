@@ -26,12 +26,23 @@ lint-project:
         - install-deps
     stage: lint
     rules:
-        - if: '$CI_COMMIT_MESSAGE  =~ /^hotfix/'
+        - if: "$CI_COMMIT_MESSAGE  =~ /^hotfix/"
           when: never
         - when: on_success
     script:
         - npm run test:lint
         - npm run test:pretty
+        - npm run test:spec
+
+test-project:
+    dependencies:
+        - install-deps
+    stage: test
+    rules:
+        - if: "$CI_COMMIT_MESSAGE  =~ /^hotfix/"
+          when: never
+        - when: on_success
+    script:
         - npm run test:spec
 
 build-project:

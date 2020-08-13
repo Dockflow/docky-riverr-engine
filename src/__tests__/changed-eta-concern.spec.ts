@@ -47,7 +47,8 @@ describe('ETA changed concern ', () => {
             transportUnits[0],
             cy,
         );
-
+        console.log(lastLocationEvent?.data.name);
+        console.log(lastLocationEvent?.data.message);
         assert.ok(lastLocationEvent?.data.name === 'discharg');
         assert.ok(lastLocationEvent?.data.status_code.id === 6130);
     });
