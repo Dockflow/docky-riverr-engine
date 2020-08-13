@@ -5,6 +5,7 @@ import { ChangedETAConcern } from '../concerning/changed-eta-concern';
 import { StoryBuildingCore } from '../story-building/story-building-core';
 import { EventAtLocationNode } from '../story-building/nodes/event-at-location-node';
 import { TransportUnit } from '../types/docky-shipment-status-types';
+import { ExecutionContext } from '../types/execution-context';
 
 describe('ETA changed concern ', () => {
     //get test files
@@ -24,7 +25,11 @@ describe('ETA changed concern ', () => {
     });
 
     it('changed eta instance with params', async () => {
-        const execContext = JSON.parse(fs.readFileSync('assets/test_files/test_ss_4.txt').toString());
+        const execContext: ExecutionContext = {
+            ...JSON.parse(fs.readFileSync('assets/test_files/test_ss_4.txt').toString()),
+            config: {},
+            tradeflow_id: 32080,
+        };
         const cy = await new StoryBuildingCore().execute(execContext);
         const segments = ChangedETAConcern.getSegments(cy, execContext);
         assert.ok(segments);
@@ -47,10 +52,9 @@ describe('ETA changed concern ', () => {
             transportUnits[0],
             cy,
         );
-        console.log(lastLocationEvent?.data.name);
-        console.log(lastLocationEvent?.data.message);
-        assert.ok(lastLocationEvent?.data.name === 'discharg');
-        assert.ok(lastLocationEvent?.data.status_code.id === 6130);
+
+        assert.strictEqual(lastLocationEvent?.data.name, 'vessel arrival');
+        assert.strictEqual(lastLocationEvent?.data.status_code.id, 156);
     });
 
     it('changed eta get tu alerts ', async () => {
