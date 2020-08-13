@@ -48,6 +48,7 @@ describe('ETA changed concern ', () => {
             cy,
         );
 
+        console.log(lastLocationEvent?.data);
         assert.ok(lastLocationEvent?.data.name === 'discharg');
         assert.ok(lastLocationEvent?.data.message === 'discharg');
         assert.ok(lastLocationEvent?.data.status_code.id === 6130);
