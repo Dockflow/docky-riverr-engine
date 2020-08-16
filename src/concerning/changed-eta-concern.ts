@@ -161,8 +161,12 @@ export class ChangedETAConcern {
 
         const lowestDate: moment.Moment = (eventsLogs as ChangedETALogEntry[])
             .reduce((carry, item) => {
-                carry.push(moment(item.new.toString()));
-                carry.push(moment(item.previous));
+                if(item.new){
+                    carry.push(moment(item.new));
+                }
+                if(item.previous){
+                    carry.push(moment(item.previous));
+                }
                 return carry;
             }, [] as moment.Moment[])
             .reduce((carry, item) => {
@@ -173,8 +177,12 @@ export class ChangedETAConcern {
             });
         const highestDate: moment.Moment = (eventsLogs as ChangedETALogEntry[])
             .reduce((carry, item) => {
-                carry.push(moment(item.new.toString()));
-                carry.push(moment(item.previous));
+                if(item.new){
+                    carry.push(moment(item.new));
+                }
+                if(item.previous){
+                    carry.push(moment(item.previous));
+                }
                 return carry;
             }, [] as moment.Moment[])
             .reduce((carry, item) => {
