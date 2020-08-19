@@ -1,6 +1,6 @@
 import { EventAtLocationNode, EventDateLogEntry } from '../story-building/nodes/event-at-location-node';
 import { TransportUnit } from '../types/docky-shipment-status-types';
-import { GroupedMilestones, MilestoneEvent } from '../types/grouped-milestone-types';
+import { GroupedMilestones, MilestoneEvent, Milestone } from '../types/grouped-milestone-types';
 import { UOTMContainerMilestonesSegment } from '../types/uotm-container-milestones-segment';
 import { ExecutionContext } from '../types/execution-context';
 
@@ -49,15 +49,22 @@ export class ContainerMilestonesConcern {
                 event_date: node.data.event_date,
                 location: node.data.location,
                 message: node.data.message,
-                events: node.data.event_date_log.map((e: EventDateLogEntry) => {
-                    return {
-                        event_date: e.event_date,
-                        actual: e.actual,
-                        location: e.source_shipment_status?.location ?? node.data.location,
-                        source: e.source_shipment_status?.shipment_condition_reading_source.name ?? '-',
-                    } as MilestoneEvent;
-                }),
-            };
+                events: (node.data.event_date_log as Array<EventDateLogEntry>)
+                    .map((e) => {
+                        return {
+                            event_date: e.event_date,
+                            actual: e.actual,
+                            location: e.source_shipment_status?.location ?? node.data.location,
+                            source: e.source_shipment_status?.shipment_condition_reading_source.name ?? '-',
+                        } as MilestoneEvent;
+                    })
+                    .reduce((carry, item) => {
+                        if (carry.filter((e) => e.event_date === item.event_date).length === 0) {
+                            carry.push(item);
+                        }
+                        return carry;
+                    }, [] as MilestoneEvent[]),
+            } as Milestone;
         });
 
         return {
