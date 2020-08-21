@@ -83,6 +83,7 @@ export class StoryBuildingCore {
                             data: {
                                 source: nout.id,
                                 target: nin.id,
+                                carrier_transport_unit: nin.data.carrier_transport_unit,
                             },
                         });
                         if (previousLBN) {
