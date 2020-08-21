@@ -44,13 +44,13 @@ export class LocationBorderNode extends NodeModel {
             node.length > 0
                 ? new this({ data: node.first().data() } as NodeModelDefinition, cy)
                 : this.create(
-                    {
-                        carrier_transport_unit: ealn.data.carrier_transport_unit,
-                        location: ealn.data.location,
-                        moveType: mt,
-                    },
-                    cy,
-                );
+                      {
+                          carrier_transport_unit: ealn.data.carrier_transport_unit,
+                          location: ealn.data.location,
+                          moveType: mt,
+                      },
+                      cy,
+                  );
 
         // Create an edge between the EALN and the LBN
         cy.add({
