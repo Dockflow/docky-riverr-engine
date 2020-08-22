@@ -6,7 +6,6 @@ export type EdgeModelDefinition = EdgeDefinition;
 
 export abstract class NodeModel implements EdgeDefinition {
     public id = '';
-    public grabbable = true;
     public data: EdgeDataDefinition & DataObject;
 
     public cy: cytoscape.Core;
