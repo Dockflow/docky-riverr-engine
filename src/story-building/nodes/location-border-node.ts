@@ -45,7 +45,7 @@ export class LocationBorderNode extends NodeModel {
                 ? new this({ data: node.first().data() } as NodeModelDefinition, cy)
                 : this.create(
                       {
-                          carrier_transport_unit: null,
+                          carrier_transport_unit: ealn.data.carrier_transport_unit,
                           location: ealn.data.location,
                           moveType: mt,
                       },

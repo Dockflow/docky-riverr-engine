@@ -1,7 +1,13 @@
 import cytoscape, { EdgeCollection, EdgeDefinition } from 'cytoscape';
 
 import { DistanceCalculator } from '../../core/distance-calculator';
-import { DockyShipmentStatus, Location, StatusCode, TransportUnit } from '../../types/docky-shipment-status-types';
+import {
+    DockyShipmentStatus,
+    Location,
+    StatusCode,
+    TransportUnit,
+    Carrier_transport_unit,
+} from '../../types/docky-shipment-status-types';
 import { LocationNode } from './location-node';
 import { NodeModel, NodeModelDefinition } from './node-model';
 import { SSEventNode } from './ss-event-node';
@@ -10,6 +16,7 @@ export type EventAtLocationKeyData = {
     status_code: StatusCode;
     location: Location;
     transport_unit: TransportUnit;
+    carrier_transport_unit: Carrier_transport_unit;
 };
 
 export type EventDateLogEntry = {
@@ -82,6 +89,7 @@ export class EventAtLocationNode extends NodeModel {
                 location: ss.location,
                 status_code: ss.status_code,
                 transport_unit: ss.transport_unit,
+                carrier_transport_unit: ss.carrier_transport_unit,
             },
             cy,
         );
