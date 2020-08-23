@@ -10,7 +10,6 @@ export type NodeModelDefinition = NodeDefinition & {
 
 export class NodeModel implements NodeDefinition {
     public id = '';
-    public grabbable = true;
     public data: DataObject;
     public cy: cytoscape.Core;
 
