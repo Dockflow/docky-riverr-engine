@@ -1,11 +1,11 @@
 import cytoscape from 'cytoscape';
 import moment from 'moment';
 
-import { EventAtLocationNode } from '../story-building/nodes/event-at-location-node';
-import { SSEventNode } from '../story-building/nodes/ss-event-node';
-import { TransportUnit } from '../types/docky-shipment-status-types';
-import { ExecutionContext } from '../types/execution-context';
-import { ChangedETALogEntry, UOTMChangedETASegment } from '../types/uotm-changed-eta-segment';
+import { EventAtLocationNode } from '../../story-building/nodes/event-at-location-node';
+import { SSEventNode } from '../../story-building/nodes/ss-event-node';
+import { TransportUnit } from '../../types/docky-shipment-status-types';
+import { ExecutionContext } from '../../types/execution-context';
+import { ChangedETALogEntry, UOTMChangedETASegment } from '../../types/uotm-changed-eta-segment';
 
 //Get the last event with eventCode
 

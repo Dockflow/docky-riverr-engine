@@ -3,8 +3,8 @@ import { sha1 } from 'object-hash';
 import { ExecutionContext } from '../types/execution-context';
 import { UOTMMessage } from '../types/uotm-message';
 import { UOTMSegment } from '../types/uotm-segment';
-import { ChangedETAConcern } from './changed-eta-concern';
 import { ContainerMilestonesConcern } from './container-milestones-concern';
+import { ChangedETAConcern } from './changed-eta/changed-eta-concern';
 
 export class ConcerningCore {
     public async execute(cy: cytoscape.Core, execContext: ExecutionContext): Promise<UOTMMessage> {
