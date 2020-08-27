@@ -1,17 +1,17 @@
 import { assert } from 'chai';
 import fs from 'fs';
-import { Orchestrator } from '../orchestrator/orchestrator';
-import { ChangedETAConcern } from '../concerning/changed-eta-concern';
-import { StoryBuildingCore } from '../story-building/story-building-core';
-import { EventAtLocationNode } from '../story-building/nodes/event-at-location-node';
-import { TransportUnit } from '../types/docky-shipment-status-types';
-import { ExecutionContext } from '../types/execution-context';
+import { Orchestrator } from '../../../orchestrator/orchestrator';
+import { ChangedETAConcern } from '../changed-eta-concern';
+import { ExecutionContext } from '../../../types/execution-context';
+import { StoryBuildingCore } from '../../../story-building/story-building-core';
+import { EventAtLocationNode } from '../../../story-building/nodes/event-at-location-node';
+import { TransportUnit } from '../../../types/docky-shipment-status-types';
 
 describe('ETA changed concern ', () => {
     //get test files
     it('Orchestrator executes with calling eta changed methods', () => {
         new Orchestrator()
-            .execute(JSON.parse(fs.readFileSync('assets/test_files/test_ss_4.txt').toString()))
+            .execute(JSON.parse(fs.readFileSync(__dirname + '/test-files/test_ss_4.txt').toString()))
             .then((res) => {
                 assert.ok(res.tradeflow_id === '32080');
                 assert.ok(res.segments[0].type === 'ContainerMilestones');
@@ -26,7 +26,7 @@ describe('ETA changed concern ', () => {
 
     it('changed eta instance with params', async () => {
         const execContext: ExecutionContext = {
-            ...JSON.parse(fs.readFileSync('assets/test_files/test_ss_4.txt').toString()),
+            ...JSON.parse(fs.readFileSync(__dirname + '/test-files/test_ss_4.txt').toString()),
             config: {},
             tradeflow_id: 32080,
         };
@@ -36,7 +36,7 @@ describe('ETA changed concern ', () => {
     });
 
     it('changed eta get first event of last location', async () => {
-        const execContext = JSON.parse(fs.readFileSync('assets/test_files/test_ss_4.txt').toString());
+        const execContext = JSON.parse(fs.readFileSync(__dirname + '/test-files/test_ss_4.txt').toString());
         const cy = await new StoryBuildingCore().execute(execContext);
 
         const transportUnits = EventAtLocationNode.all(cy).reduce((carry, item) => {
@@ -58,8 +58,8 @@ describe('ETA changed concern ', () => {
     });
 
     it('changed eta get tu alerts ', async () => {
-        const ss1 = JSON.parse(fs.readFileSync('assets/test_files/test_ss_4.txt').toString());
-        const ss2 = JSON.parse(fs.readFileSync('assets/test_files/test_ss_12.txt').toString());
+        const ss1 = JSON.parse(fs.readFileSync(__dirname + '/test-files/test_ss_4.txt').toString());
+        const ss2 = JSON.parse(fs.readFileSync(__dirname + '/test-files/test_ss_12.txt').toString());
 
         const cy1 = await new StoryBuildingCore().execute(ss1);
         const cy2 = await new StoryBuildingCore().execute(ss2);
