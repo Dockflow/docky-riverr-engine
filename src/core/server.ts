@@ -39,7 +39,7 @@ export class GraphyServer {
         // Actual exit of process on uncaught rejection
         process.on('unhandledRejection', function (err) {
             try {
-                logger.warning(new Date().toUTCString() + ' uncaughtException:');
+                logger.debug(new Date().toUTCString() + ' uncaughtException:');
             } catch (e) {
                 //
             }
@@ -50,7 +50,7 @@ export class GraphyServer {
         // Actual exit of process on uncaught error
         process.on('uncaughtException', function (err) {
             try {
-                logger.warning(new Date().toUTCString() + ' uncaughtException:', err.message);
+                logger.debug(new Date().toUTCString() + ' uncaughtException:', err.message);
             } catch (e) {
                 //
             }
