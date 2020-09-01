@@ -4,6 +4,8 @@ import { StoryBuildingCore } from '../story-building/story-building-core';
 import { EventAtLocationNode } from '../story-building/nodes/event-at-location-node';
 
 describe('Story Building Core concern ', () => {
+
+
     it('should create component', async () => {
         // given
         const execContext = JSON.parse(fs.readFileSync('assets/test-files/test_ss_1.txt').toString());
@@ -16,6 +18,7 @@ describe('Story Building Core concern ', () => {
     });
 
     it('basic tests for story', async () => {
+
         const promises = [...Array(16).keys()].map(async (key) => {
             if (key === 0) {
                 return true;
@@ -57,7 +60,7 @@ describe('Story Building Core concern ', () => {
 
         await Promise.all(promises);
         assert.ok(true);
-    });
+    }).timeout(10000);
 
     it('should create collection of one or more elements (nodes and edges)', async () => {
         // given
