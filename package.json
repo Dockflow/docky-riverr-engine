@@ -12,7 +12,7 @@
         "test-raw": "run-s test:lint test:pretty test:spec",
         "test:integration": "mocha --exit -r ts-node/register src/tests/integration.ts",
         "test:unit": "mocha -r ts-node/register src/tests/unit.ts --max-http-header-size=50000 --exit",
-        "test:spec": "mocha -r ts-node/register src/**/*.spec.ts --max-http-header-size=50000",
+        "test:spec": "mocha -r ts-node/register \"src/**/*.spec.ts\" --max-http-header-size=50000",
         "test:lint": "eslint --max-warnings=0 ./src/ --ext .ts",
         "test:pretty": "prettier \"src/**/*.ts\" --list-different",
         "test:unit:single": "func(){ mocha -r ts-node/register src/$1/*.spec.ts; }; func",

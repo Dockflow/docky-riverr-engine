@@ -2,9 +2,9 @@ image: node:14-alpine
 stages:
     - dependencies
     - lint
+    - test
     - build project
     - build image
-    - test
     - push
     # - deploy
 
@@ -33,6 +33,18 @@ lint-project:
     script:
         - npm run test:lint
         - npm run test:pretty
+
+test-project:
+    dependencies:
+        - install-deps
+    stage: test
+    rules:
+        - if: '$CI_COMMIT_MESSAGE  =~ /^hotfix/'
+          when: never
+        - when: on_success
+    script:
+        - npm run test:spec
+
 build-project:
     dependencies:
         - install-deps
@@ -64,26 +76,6 @@ build-image:
     script:
         - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG .
         - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-
-test-ci:
-    retry:
-        max: 2
-        when:
-            - always
-    dependencies:
-        - install-deps
-    image:
-        name: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-        entrypoint: ['']
-    stage: test
-    rules:
-        - if: '$CI_COMMIT_MESSAGE  =~ /^hotfix/'
-          when: never
-        - when: on_success
-    coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
-    script:
-        - export NODE_OPTIONS=--max-old-space-size=8192
-        - npm run test:spec
 
 push-production:
     tags:
