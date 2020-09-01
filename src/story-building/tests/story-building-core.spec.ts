@@ -35,4 +35,26 @@ describe('Story Building specific ', () => {
             assert.equal(transportUnits[3].data.status_code.status_code, order[7]);
         }
     });
+
+    it('replace node cannot have null eventdate ', async () => {
+        // given
+        const execContext = JSON.parse(fs.readFileSync(__dirname + '/test-files/36117_null_event_date.txt').toString());
+
+        // when
+        const cy = await new StoryBuildingCore().execute(execContext);
+
+        // then
+        assert.ok(cy.edges().length > 0);
+    });
+
+    it('replace node cannot be in different transport_unit id', async () => {
+        // given
+        const execContext = JSON.parse(fs.readFileSync(__dirname + '/test-files/36117_null_event_date.txt').toString());
+
+        // when
+        const cy = await new StoryBuildingCore().execute(execContext);
+
+        // then
+        assert.ok(cy.edges().length > 0);
+    });
 });

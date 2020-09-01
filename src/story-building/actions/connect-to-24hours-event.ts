@@ -6,6 +6,9 @@ export function connectToNext24HoursEvent(currentNode: EventAtLocationNode): voi
         const nextNode = currentNode.streamNodes('downstream').shift(); // take the downstream event of current node.
         const replaceNode = EventAtLocationNode.all(currentNode.cy)
             .filter((e) => e.id !== currentNode.id)
+            .filter((e) => e.data.location.id === currentNode.data.location.id)
+            .filter((e) => e.data.transport_unit.id === currentNode.data.transport_unit.id)
+            .filter((e) => e.data.event_date !== null)
             .filter((e) => {
                 // find nodes within 30 hours of current node.
                 const diff_milliseconds = Math.abs(
@@ -54,12 +57,12 @@ export function connectToNext24HoursEvent(currentNode: EventAtLocationNode): voi
                 .filter((e) => e.data().target === replaceNode.data.id);
 
             // remove edge which has replace node as an target node.
-            replaceNode.cy.remove(replaceNode.cy.$id(targetEdge.data().id));
+            if (targetEdge.data()?.id) replaceNode.cy.remove(replaceNode.cy.$id(targetEdge.data().id));
 
-            if (sourceEdge.length > 0) {
-                // remove edge which has replace node as an source node.
-                replaceNode.cy.remove(replaceNode.cy.$id(sourceEdge.data().id));
+            // remove edge which has replace node as an source node.
+            if (sourceEdge.data()?.id) replaceNode.cy.remove(replaceNode.cy.$id(sourceEdge.data().id));
 
+            if (targetEdge.data()?.source && sourceEdge.data()?.target) {
                 // in oder to keep the tradeflow, connect edges together which connected to replace node
                 replaceNode.cy.add({
                     data: {
@@ -77,7 +80,7 @@ export function connectToNext24HoursEvent(currentNode: EventAtLocationNode): voi
                 .filter((e) => e.data().source === currentNode.data.id && e.data().target === nextNode.data.id);
 
             // remove edge which is connected to current node and downstream node.
-            currentNode.cy.remove(currentNode.cy.$id(currentEdge.data().id));
+            if (currentEdge.data()?.id) currentNode.cy.remove(currentNode.cy.$id(currentEdge.data().id));
 
             // connect replace node betweeen current node and downstream node.
             replaceNode.cy.add({
