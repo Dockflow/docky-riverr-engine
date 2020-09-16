@@ -57,4 +57,48 @@ describe('Story Building specific ', () => {
         // then
         assert.ok(cy.edges().length > 0);
     });
+
+    it('connect null event nodes to the existing trade_flow', async () => {
+        // given
+        const execContext = JSON.parse(fs.readFileSync(__dirname + '/test-files/38056_null_event.txt').toString());
+
+        // when
+        const cy = await new StoryBuildingCore().execute(execContext);
+        EventAtLocationNode.all(cy)
+            .filter((e) => e.streamNodes('upstream').length === 0)
+            .filter((e) => e.data.type === EventAtLocationNode.TYPE)
+            .forEach((e) => {
+                // this means we're looking at a new TP for a specific TU
+                const transportUnits = e.streamNodes('downstream');
+                assert.ok(transportUnits);
+                if (transportUnits) {
+                    assert.ok(transportUnits?.length === 3);
+                    const order = EventAtLocationNode.naturalOrder;
+                    assert.equal(transportUnits[0].data.status_code.status_code, order[1]);
+                    assert.equal(transportUnits[1].data.status_code.status_code, order[2]);
+                    assert.equal(transportUnits[2].data.status_code.status_code, order[4]);
+                }
+            });
+    });
+
+    it('should connect the nodes, even in cases where event_date is null', async () => {
+        // given
+        const execContext = JSON.parse(fs.readFileSync(__dirname + '/test-files/36748_null_events.txt').toString());
+
+        // when
+        const cy = await new StoryBuildingCore().execute(execContext);
+        assert.isAtLeast(
+            EventAtLocationNode.all(cy)
+                .filter((e) => e.streamNodes('upstream').length === 0)
+                .sort((a, b) => {
+                    const aCount = a.streamNodes('downstream').length;
+                    const bCount = b.streamNodes('downstream').length;
+
+                    return bCount - aCount;
+                })
+                .shift()
+                ?.streamNodes('downstream').length ?? 0,
+            10,
+        );
+    });
 });
