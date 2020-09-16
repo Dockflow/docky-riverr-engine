@@ -7,6 +7,7 @@ import { LocationNode } from './nodes/location-node';
 import { SSEventNode } from './nodes/ss-event-node';
 import { connectToNextEvent } from '../story-building/actions/connect-to-next-event';
 import { connectToNext24HoursEvent } from '../story-building/actions/connect-to-24hours-event';
+import { connectToNullEventdateEvent } from '../story-building/actions/connect-null-eventdate-event';
 
 export class StoryBuildingCore {
     public async execute(execContext: ExecutionContext): Promise<cytoscape.Core> {
@@ -66,6 +67,13 @@ export class StoryBuildingCore {
             .filter((e) => e.streamNodes('upstream').length === 0)
             .forEach((e) => {
                 connectToNext24HoursEvent(e);
+            });
+
+        // Connect each event to the null events
+        EventAtLocationNode.all(cy)
+            .filter((e) => e.streamNodes('upstream').length === 0)
+            .forEach((e) => {
+                connectToNullEventdateEvent(e);
             });
 
         // Set downstream actuals consistently
