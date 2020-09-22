@@ -82,6 +82,12 @@ export class StoryBuildingCore {
         // });
 
         // Make the LBNs (Location Border Nodes) by walking over each
+        const booking_details = execContext.shipment_statuses.filter(
+            (e) =>
+                e.message == 'Booking details' &&
+                e.specific_status.bill_of_lading_reference != null &&
+                e.specific_status.booking_reference != null,
+        );
         EventAtLocationNode.all(cy)
             .filter((e) => e.streamNodes('upstream').length === 0)
             .forEach((e) => {
@@ -92,8 +98,15 @@ export class StoryBuildingCore {
                 downStreamNodes.forEach((n) => {
                     if (n.data.location.id !== previousNode.data.location.id) {
                         // the previous was an outgoing and we are an incoming
-                        const nout = LocationBorderNode.firstOrCreate('OUT', previousNode, cy);
-                        const nin = LocationBorderNode.firstOrCreate('IN', n, cy);
+                        const booking = booking_details
+                            .filter(
+                                (e) =>
+                                    e.shipment_condition_reading_source_id ===
+                                    n.data.shipment_condition_reading_source_id,
+                            )
+                            .shift()?.specific_status.booking_reference;
+                        const nout = LocationBorderNode.firstOrCreate('OUT', previousNode, cy, booking ? booking : '');
+                        const nin = LocationBorderNode.firstOrCreate('IN', n, cy, '');
 
                         // Connect these nodes
                         cy.add({
@@ -101,6 +114,7 @@ export class StoryBuildingCore {
                                 source: nout.id,
                                 target: nin.id,
                                 carrier_transport_unit: nin.data.carrier_transport_unit,
+                                type: LocationBorderNode.NEXT_LOCATION_EALN_EDGE,
                             },
                         });
                         if (previousLBN) {

@@ -15,7 +15,7 @@ describe('ETA changed concern ', () => {
             .then((res) => {
                 assert.ok(res.tradeflow_id === '32080');
                 assert.ok(res.segments[0].type === 'ContainerMilestones');
-                assert.ok(res.segments.length === 1);
+                assert.ok(res.segments.length === 2);
             });
     });
 

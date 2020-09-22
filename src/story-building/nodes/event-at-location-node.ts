@@ -17,6 +17,7 @@ export type EventAtLocationKeyData = {
     location: Location;
     transport_unit: TransportUnit;
     carrier_transport_unit: Carrier_transport_unit;
+    shipment_condition_reading_source_id: number;
 };
 
 export type EventDateLogEntry = {
@@ -91,6 +92,7 @@ export class EventAtLocationNode extends NodeModel {
                 status_code: ss.status_code,
                 transport_unit: ss.transport_unit,
                 carrier_transport_unit: ss.carrier_transport_unit,
+                shipment_condition_reading_source_id: ss.shipment_condition_reading_source_id,
             },
             cy,
         );

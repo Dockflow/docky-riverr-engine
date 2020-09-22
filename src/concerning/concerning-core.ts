@@ -5,6 +5,7 @@ import { UOTMMessage } from '../types/uotm-message';
 import { UOTMSegment } from '../types/uotm-segment';
 import { ContainerMilestonesConcern } from './container-milestones-concern';
 import { ChangedETAConcern } from './changed-eta/changed-eta-concern';
+import { TPGeneration } from './tp-generation/tp-generation-concern';
 
 export class ConcerningCore {
     public async execute(cy: cytoscape.Core, execContext: ExecutionContext): Promise<UOTMMessage> {
@@ -23,6 +24,7 @@ export class ConcerningCore {
         //segments.push(...DetentionDemurrageConcern.getSegments(cy, id));
         segments.push(...ContainerMilestonesConcern.getSegments(cy, execContext));
         segments.push(...ChangedETAConcern.getSegments(cy, execContext));
+        segments.push(...TPGeneration.getSegments(cy));
 
         const uotm = {
             tradeflow_id: execContext.tradeflow_id,

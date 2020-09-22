@@ -16,7 +16,7 @@ describe('Story Building Core concern ', () => {
     });
 
     it('basic tests for story', async () => {
-        const promises = [...Array(17).keys()].map(async (key) => {
+        const promises = [...Array(19).keys()].map(async (key) => {
             if (key === 0) {
                 return true;
             }
