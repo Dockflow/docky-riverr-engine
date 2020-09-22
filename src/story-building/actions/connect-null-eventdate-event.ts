@@ -6,6 +6,7 @@ export function connectToNullEventdateEvent(currentNode: EventAtLocationNode): v
         const nextNode = currentNode.streamNodes('downstream').shift(); // take the downstream event of current node.
         const replaceNode = EventAtLocationNode.all(currentNode.cy)
             .filter((e) => e.id !== currentNode.id)
+            .filter((e) => e.data.event_date === null || e.data.event_date === undefined)
             .filter((e) => e.data.transport_unit && e.data.transport_unit.id === currentNode.data.transport_unit.id)
             .filter((i) => {
                 // check any node between current node and downstream event according to transhipment oder.
