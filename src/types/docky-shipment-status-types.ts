@@ -107,6 +107,8 @@ export interface SpecificStatus {
     subscription_id: string;
     raw_attribute: string;
     raw_filetype: string;
+    booking_reference: string | null;
+    bill_of_lading_reference: string | null;
 }
 
 export interface StatusCode {
