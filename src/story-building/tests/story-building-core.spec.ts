@@ -60,7 +60,6 @@ describe('Story Building specific ', () => {
             if (e.data.location && !(e.data.location.name as string).toLowerCase().includes('brugge')) {
                 outOfBruges = true;
             }
-            console.log('outOfBruges', outOfBruges, e.data.location.name);
 
             // If we are in bruges again, we have problem
             if (outOfBruges && e.data.location) {
@@ -132,6 +131,28 @@ describe('Story Building specific ', () => {
                 .shift()
                 ?.streamNodes('downstream').length ?? 0,
             10,
+        );
+    });
+    it('should not skip intermediate locations', async () => {
+        // given
+        const execContext = JSON.parse(fs.readFileSync(__dirname + '/test-files/test_ss_17.txt').toString());
+
+        // when
+        const cy = await new StoryBuildingCore().execute(execContext);
+        assert.isAtLeast(
+            EventAtLocationNode.all(cy)
+                .filter((e) => e.streamNodes('upstream').length === 0)
+                .sort((a, b) => {
+                    const aCount = a.streamNodes('downstream').length;
+                    const bCount = b.streamNodes('downstream').length;
+
+                    return bCount - aCount;
+                })
+                .shift()
+                ?.streamNodes('downstream')
+                .filter((e) => e.data.location && (e.data.location.name as string).toLowerCase().includes('singapore'))
+                .length ?? 0,
+            1,
         );
     });
 });
