@@ -1,4 +1,4 @@
-import { TPShipment } from './grouped-transportPlan-types';
+import { TPShipment } from './grouped-transport-plan-types';
 
 export type UOTMTransportPlanSegment = {
     type: 'TransportPlan';

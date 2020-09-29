@@ -1,7 +1,6 @@
-import { SeaShipment, TPShipment, SeaMovement, PredictedTimeLog } from '../../types/grouped-transportPlan-types';
+import { SeaShipment, TPShipment, SeaMovement, PredictedTimeLog } from '../../types/grouped-transport-plan-types';
 import { LocationBorderNode } from '../../story-building/nodes/location-border-node';
 import { UOTMTransportPlanSegment } from '../../types/uotm-transportplan-segment';
-import { TransportUnit } from '../../types/docky-shipment-status-types';
 
 export class TPGeneration {
     public static getSegments(cy: cytoscape.Core): UOTMTransportPlanSegment[] {
@@ -9,29 +8,35 @@ export class TPGeneration {
         return [TPGeneration.getTransportPlanSegment(cy)] as UOTMTransportPlanSegment[];
     }
 
-    public static getTransportPlanSegment(cy: cytoscape.Core): UOTMTransportPlanSegment | null {
-        const transportUnit: TransportUnit[] = []; //
-        const seaShipment: SeaShipment[] = [];
+    public static getTransportPlanSegment(cy: cytoscape.Core): UOTMTransportPlanSegment {
+        const tp_shipment: TPShipment[] = [];
         LocationBorderNode.all(cy)
             .filter((e) => e.streamNodes('upstream').length === 0)
             .forEach((startingNode) => {
+                const seaShipment: SeaShipment[] = [];
                 const seaMovement: SeaMovement[] = [];
+
                 const transportNodes = [startingNode, ...startingNode.streamNodes('downstream')];
+
+                // will get set of sea movements
                 transportNodes
                     .filter((e) => e.data.moveType === 'OUT')
-                    .forEach((node, index) => {
+                    .forEach((out_node) => {
+                        const in_node = transportNodes[transportNodes.indexOf(out_node) + 1];
                         seaMovement.push({
-                            port_of_loading: transportNodes[index + 1].data.location,
-                            port_of_discharge: node.data.location,
-                            departure_date: this.findEventDate(node.data.event_date_log),
-                            arrival_date: this.findEventDate(transportNodes[index + 1].data.event_date_log),
-                            arrival_date_history: transportNodes[index + 1].data.event_date_log,
-                            departure_date_history: node.data.event_date_log,
-                            carrier: node.data.carrier_transport_unit?.name,
-                            carrier_transport_unit: node.data.carrier_transport_unit,
+                            port_of_loading: out_node.data.location,
+                            port_of_discharge: in_node.data.location,
+                            departure_date: this.findEventDate(out_node.data.event_date_log),
+                            departure_date_history: out_node.data.event_date_log,
+                            arrival_date: this.findEventDate(in_node.data.event_date_log),
+                            arrival_date_history: in_node.data.event_date_log,
+                            carrier: in_node.data.carrier_transport_unit?.name,
+                            carrier_transport_unit: in_node.data.carrier_transport_unit,
                             completed: true, //  temporary value
                         } as SeaMovement);
                     });
+
+                // will recieve sea shipment of perticular container set
                 seaShipment.push({
                     carrier: startingNode.data.carrier_transport_unit?.name,
                     type: 'SeaShipment',
@@ -41,16 +46,16 @@ export class TPGeneration {
                         : null,
                     sea_shipment_legs: seaMovement,
                 } as SeaShipment); // missing TransportPlanLeg
+
+                tp_shipment.push({
+                    containers: startingNode.data.containers,
+                    transport_plan_legs: seaShipment,
+                });
             });
 
         return {
             type: 'TransportPlan',
-            shipments: [
-                {
-                    containers: transportUnit,
-                    transport_plan_legs: seaShipment,
-                } as TPShipment,
-            ],
+            shipments: tp_shipment,
         };
     }
     static findEventDate(event_date_log: PredictedTimeLog[]): string | null {

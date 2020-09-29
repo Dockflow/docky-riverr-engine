@@ -1,7 +1,6 @@
 import cytoscape from 'cytoscape';
 
-import { PredictedTimeLog } from '../../types/grouped-transportPlan-types';
-import { Location, TransportUnit } from '../../types/docky-shipment-status-types';
+import { Event_date_log, Location, TransportUnit } from '../../types/docky-shipment-status-types';
 import { EventAtLocationNode } from './event-at-location-node';
 import { LocationNode } from './location-node';
 import { NodeModel, NodeModelDefinition } from './node-model';
@@ -12,19 +11,20 @@ export type LocationBorderNodeCharacteristics = {
     moveType: MoveType;
     carrier_transport_unit: null | TransportUnit;
     booking_reference: null | string;
+    event_date_log: Event_date_log[];
+    containers: TransportUnit[];
 };
 
 export class LocationBorderNode extends NodeModel {
     public static TYPE = 'LocationBorderNode';
     public static NEXT_LOCATION_EALN_EDGE = 'NEXT_LOCATION_EALN_EDGE';
-    public event_date_log: Array<PredictedTimeLog> = [];
+    public static INT_LOCATION_EALN_EDGE = 'INT_LOCATION_EALN_EDGE'; // interlocation edge that connect inter location nodes
 
     public static create(keyData: LocationBorderNodeCharacteristics, cy: cytoscape.Core): LocationBorderNode {
         const node = new this(
             {
                 data: {
                     type: this.TYPE,
-                    event_date_log: [],
                     name:
                         keyData.moveType +
                         (keyData.carrier_transport_unit ? keyData.carrier_transport_unit.reference : ''),
@@ -51,6 +51,18 @@ export class LocationBorderNode extends NodeModel {
             .filter((e) => e.data().location.id === ealn.data.location.id)
             .filter((e) => e.data().location.updated_at === ealn.data.location.updated_at)
             .filter((e) => e.data().moveType === mt);
+        if (node.length > 0) {
+            // add event_date_log
+            node.first().data().event_date_log.push({
+                reading: null, // When is the TU arriving / departing
+                event_date: ealn.data.event_date, // When this prediction was made
+                actual: ealn.data.actual,
+            });
+
+            // add transport units
+            node.first().data().containers.push(ealn.data.transport_unit);
+        }
+
         const theNode =
             node.length > 0
                 ? new this({ data: node.first().data() } as NodeModelDefinition, cy)
@@ -60,16 +72,17 @@ export class LocationBorderNode extends NodeModel {
                           location: ealn.data.location,
                           moveType: mt,
                           booking_reference: booking,
+                          event_date_log: [
+                              {
+                                  reading: null, // When is the TU arriving / departing
+                                  event_date: ealn.data.event_date, // When this prediction was made
+                                  actual: ealn.data.actual,
+                              },
+                          ],
+                          containers: [ealn.data.transport_unit],
                       },
                       cy,
                   );
-
-        // add event_date_log
-        theNode.data.event_date_log.push({
-            reading: null, // When is the TU arriving / departing
-            event_date: ealn.data.event_date, // When this prediction was made
-            actual: ealn.data.actual,
-        });
 
         // Create an edge between the EALN and the LBN
         cy.add({
@@ -109,8 +122,11 @@ export class LocationBorderNode extends NodeModel {
         const eDirection = direction === 'upstream' ? 'target' : 'source';
         const relevantEdges = this.cy
             .edges()
+            .filter((e) => e.data()[eDirection] === this.id)
             .filter(
-                (e) => e.data().type === LocationBorderNode.NEXT_LOCATION_EALN_EDGE && e.data()[eDirection] === this.id,
+                (e) =>
+                    e.data().type === LocationBorderNode.NEXT_LOCATION_EALN_EDGE ||
+                    e.data().type === LocationBorderNode.INT_LOCATION_EALN_EDGE,
             );
         if (relevantEdges.length === 0) {
             return;
