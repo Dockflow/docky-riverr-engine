@@ -49,9 +49,38 @@ describe('Transport Plan concern ', () => {
         assert.ok(segments.length === 1);
         segments.forEach((node) => {
             assert.ok(node.type === 'TransportPlan');
-            // assert.ok(node.log.milestones.length == 2);
-            // assert.ok(node.log.milestones[0].moveType === 'OUT');
-            // assert.ok(node.log.milestones[1].moveType === 'IN');
+            assert.ok(node.shipments.length == 1);
+            assert.ok(node.shipments[0].containers.length == 1);
+            assert.ok(node.shipments[0].transport_plan_legs.length == 1);
+            assert.ok(node.shipments[0].transport_plan_legs[0].sea_shipment_legs.length === 1);
+        });
+    });
+
+    it('mulitple transport plan get in & out of locations', async () => {
+        // given
+        const execContext = JSON.parse(
+            fs.readFileSync(__dirname + '/test-files/36623_multiple_tp_plan.txt').toString(),
+        );
+        const cy = await new StoryBuildingCore().execute(execContext);
+
+        //when
+        const segments: UOTMTransportPlanSegment[] = TPGeneration.getSegments(cy);
+
+        //then
+        assert.ok(segments.length === 1);
+        segments.forEach((node) => {
+            assert.ok(node.type === 'TransportPlan');
+            assert.ok(node.shipments.length == 2);
+
+            // tp 1
+            assert.ok(node.shipments[0].containers.length == 3);
+            assert.ok(node.shipments[0].transport_plan_legs.length == 1);
+            assert.ok(node.shipments[0].transport_plan_legs[0].sea_shipment_legs.length === 2);
+
+            // tp 2
+            assert.ok(node.shipments[1].containers.length == 1);
+            assert.ok(node.shipments[1].transport_plan_legs.length == 1);
+            assert.ok(node.shipments[1].transport_plan_legs[0].sea_shipment_legs.length === 2);
         });
     });
 });

@@ -122,6 +122,7 @@ export class StoryBuildingCore {
                                 data: {
                                     source: previousLBN.id,
                                     target: nout.id,
+                                    type: LocationBorderNode.INT_LOCATION_EALN_EDGE,
                                 },
                             });
                         }

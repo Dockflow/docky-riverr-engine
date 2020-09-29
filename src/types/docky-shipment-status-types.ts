@@ -139,3 +139,9 @@ export interface Carrier_transport_unit {
     pseudo: boolean;
     type: string;
 }
+
+export interface Event_date_log {
+    reading: null; // When is the TU arriving / departing
+    event_date: string; // When this prediction was made
+    actual: boolean;
+}
