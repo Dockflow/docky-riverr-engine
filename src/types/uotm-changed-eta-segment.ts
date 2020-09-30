@@ -1,18 +1,21 @@
-import { TransportUnit, Location } from './docky-shipment-status-types';
-import { DataObject } from './data-object';
+import { Location, TransportUnit } from './docky-shipment-status-types';
+
 export type ChangedETALogEntry = {
-    previous: string;
-    new: string;
+    previous_reading: string;
+    event_date: string;
+    reading: string;
+    hash: string;
+    in_transit_change: boolean;
+    valid_until: string;
 };
 export type UOTMChangedETASegment = {
     type: 'ChangedETA';
-    alert: boolean;
+    current_alert: ChangedETALogEntry | null;
     transport_unit: TransportUnit;
+    transport_unit_id: number | null;
+    carrier_transport_unit: TransportUnit;
+    carrier_transport_unit_id: number | null;
     location: Location;
+    location_id: number | null;
     log: ChangedETALogEntry[];
-    delta_in_seconds: number;
-    delay?: any;
-    eta_event_based?: DataObject;
-    eta_changes_number?: number;
-    stats?: any;
 };

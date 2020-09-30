@@ -48,7 +48,7 @@ describe('ETA changed concern ', () => {
 
         assert.ok(transportUnits.length === 1);
 
-        const lastLocationEvent: EventAtLocationNode | null = ChangedETAConcern.firstEventLastLocation(
+        const lastLocationEvent: EventAtLocationNode | null = ChangedETAConcern.getVesselArrivalEvent(
             transportUnits[0],
             cy,
         );
