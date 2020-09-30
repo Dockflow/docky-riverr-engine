@@ -1,21 +1,21 @@
 import { assert } from 'chai';
 import fs from 'fs';
+
 import { Orchestrator } from '../../../orchestrator/orchestrator';
-import { ChangedETAConcern } from '../changed-eta-concern';
-import { ExecutionContext } from '../../../types/execution-context';
-import { StoryBuildingCore } from '../../../story-building/story-building-core';
 import { EventAtLocationNode } from '../../../story-building/nodes/event-at-location-node';
+import { StoryBuildingCore } from '../../../story-building/story-building-core';
 import { TransportUnit } from '../../../types/docky-shipment-status-types';
+import { ExecutionContext } from '../../../types/execution-context';
+import { ChangedETAConcern } from '../changed-eta-concern';
 
 describe('ETA changed concern ', () => {
     //get test files
-    it('Orchestrator executes with calling eta changed methods', () => {
-        new Orchestrator()
+    it('Orchestrator executes with calling eta changed methods', async () => {
+        return new Orchestrator()
             .execute(JSON.parse(fs.readFileSync(__dirname + '/test-files/test_ss_4.txt').toString()))
             .then((res) => {
                 assert.ok(res.tradeflow_id === '32080');
-                assert.ok(res.segments[0].type === 'ContainerMilestones');
-                assert.ok(res.segments.length === 2);
+                assert.ok(res.segments.find((e) => e.type === 'ChangedETA'));
             });
     });
 
@@ -66,22 +66,16 @@ describe('ETA changed concern ', () => {
 
         const uomtmessages1 = ChangedETAConcern.getSegments(cy1, {
             shipment_statuses: ss1.shipment_statuses,
-            config: { eta_delay_in_hours: 24, eta_changed_limit: 3 },
+            config: {},
             tradeflow_id: ss1.shipment_statuses[0].tradeflow_id,
         });
         const uomtmessages2 = ChangedETAConcern.getSegments(cy2, {
             shipment_statuses: ss2.shipment_statuses,
-            config: { eta_delay_in_hours: 24, eta_changed_limit: 3 },
-            tradeflow_id: ss2.shipment_statuses[0].tradeflow_id,
-        });
-        const uomtmessages3 = ChangedETAConcern.getSegments(cy2, {
-            shipment_statuses: ss2.shipment_statuses,
-            config: { eta_delay_in_hours: 1000, eta_changed_limit: 3 },
+            config: {},
             tradeflow_id: ss2.shipment_statuses[0].tradeflow_id,
         });
 
-        assert.ok(uomtmessages1.length === 0);
-        assert.ok(uomtmessages2.length === 1);
-        assert.ok(uomtmessages3.length === 0);
+        assert.strictEqual(uomtmessages1.pop()?.log.length ?? 0, 3);
+        assert.strictEqual(uomtmessages2.pop()?.log.length ?? 0, 1);
     });
 });

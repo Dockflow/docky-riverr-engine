@@ -27,8 +27,5 @@ export const config = {
                     : false,
         },
     },
-    default_configuration: {
-        eta_changed_limit: 3,
-        eta_delay_in_hours: 12,
-    } as ExecutionConfiguration,
+    default_configuration: {} as ExecutionConfiguration,
 };
