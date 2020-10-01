@@ -22,6 +22,7 @@ export class ChangedETAConcern {
             .sort((a, b) => {
                 return +moment(a.data.shipment_status.created_at) - +moment(b.data.shipment_status.created_at);
             })
+            .filter((e) => e.data.shipment_status.event_date != null)
             .reduce(
                 (carry, item) => {
                     // console.log('checking event created at ', item.data.shipment_status.created_at);
