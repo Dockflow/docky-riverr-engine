@@ -91,7 +91,7 @@
         "@typescript-eslint/parser": "^4.3.0",
         "assert": "^2.0.0",
         "chai": "^4.2.0",
-        "copyfiles": "^2.3.0",
+        "copyfiles": "^2.4.0",
         "eslint": "^7.10.0",
         "eslint-config-prettier": "^6.12.0",
         "eslint-plugin-prettier": "^3.1.4",
