@@ -1,6 +1,6 @@
 import cytoscape from 'cytoscape';
 
-import { Event_date_log, Location, TransportUnit } from '../../types/docky-shipment-status-types';
+import { Carrier, Event_date_log, Location, TransportUnit } from '../../types/docky-shipment-status-types';
 import { EventAtLocationNode } from './event-at-location-node';
 import { LocationNode } from './location-node';
 import { NodeModel, NodeModelDefinition } from './node-model';
@@ -9,6 +9,7 @@ export type MoveType = 'IN' | 'OUT';
 export type LocationBorderNodeCharacteristics = {
     location: Location;
     moveType: MoveType;
+    carrier: Carrier;
     carrier_transport_unit: null | TransportUnit;
     booking_reference: null | string;
     event_date_log: Event_date_log[];
@@ -68,6 +69,7 @@ export class LocationBorderNode extends NodeModel {
                 ? new this({ data: node.first().data() } as NodeModelDefinition, cy)
                 : this.create(
                       {
+                          carrier: ealn.data.carrier,
                           carrier_transport_unit: ealn.data.carrier_transport_unit,
                           location: ealn.data.location,
                           moveType: mt,

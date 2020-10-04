@@ -114,6 +114,7 @@ export class StoryBuildingCore {
                                 source: nout.id,
                                 target: nin.id,
                                 carrier_transport_unit: nin.data.carrier_transport_unit,
+                                carrier: nin.data.carrier,
                                 type: LocationBorderNode.NEXT_LOCATION_EALN_EDGE,
                             },
                         });
