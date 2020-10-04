@@ -61,7 +61,7 @@
         "socket.io": "^2.2.0",
         "socket.io-client": "^2.3.1",
         "throttled-queue": "^1.0.7",
-        "uuid": "^8.3.0",
+        "uuid": "^8.3.1",
         "winston": "^3.3.3",
         "winston-logzio": "^5.1.2",
         "xmlhttprequest": "^1.8.0"
