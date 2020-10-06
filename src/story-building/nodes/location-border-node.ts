@@ -1,6 +1,6 @@
 import cytoscape from 'cytoscape';
 
-import { Carrier, Event_date_log, Location, TransportUnit } from '../../types/docky-shipment-status-types';
+import { Carrier, EventDateLog, Location, TransportUnit } from '../../types/docky-shipment-status-types';
 import { EventAtLocationNode } from './event-at-location-node';
 import { LocationNode } from './location-node';
 import { NodeModel, NodeModelDefinition } from './node-model';
@@ -10,9 +10,9 @@ export type LocationBorderNodeCharacteristics = {
     location: Location;
     moveType: MoveType;
     carrier: Carrier;
-    carrier_transport_unit: null | TransportUnit;
+    carrier_transport_unit: TransportUnit;
     booking_reference: null | string;
-    event_date_log: Event_date_log[];
+    event_date_log: EventDateLog[];
     containers: TransportUnit[];
 };
 
@@ -70,7 +70,18 @@ export class LocationBorderNode extends NodeModel {
                 : this.create(
                       {
                           carrier: ealn.data.carrier,
-                          carrier_transport_unit: ealn.data.carrier_transport_unit,
+                          carrier_transport_unit: ealn.data.carrier_transport_unit
+                              ? ealn.data.carrier_transport_unit
+                              : ({
+                                    id: 0,
+                                    reference: '',
+                                    specific_tu_type_id: 0,
+                                    specific_tu_type_type: '',
+                                    created_at: new Date(),
+                                    updated_at: new Date(),
+                                    type: 'Vessel',
+                                    pseudo: true,
+                                } as TransportUnit),
                           location: ealn.data.location,
                           moveType: mt,
                           booking_reference: booking,

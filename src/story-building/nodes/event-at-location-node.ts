@@ -2,12 +2,11 @@ import cytoscape, { EdgeCollection, EdgeDefinition } from 'cytoscape';
 
 import { DistanceCalculator } from '../../core/distance-calculator';
 import {
+    Carrier,
     DockyShipmentStatus,
     Location,
     StatusCode,
     TransportUnit,
-    Carrier_transport_unit,
-    Carrier,
 } from '../../types/docky-shipment-status-types';
 import { LocationNode } from './location-node';
 import { NodeModel, NodeModelDefinition } from './node-model';
@@ -18,7 +17,7 @@ export type EventAtLocationKeyData = {
     location: Location;
     transport_unit: TransportUnit;
     carrier: Carrier;
-    carrier_transport_unit: Carrier_transport_unit;
+    carrier_transport_unit: TransportUnit;
     shipment_condition_reading_source_id: number;
 };
 
