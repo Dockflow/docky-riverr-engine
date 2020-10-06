@@ -24,7 +24,7 @@ export interface DockyShipmentStatus {
     carrier: Carrier;
     location: Location;
     transport_unit: TransportUnit;
-    carrier_transport_unit: Carrier_transport_unit;
+    carrier_transport_unit: TransportUnit;
     shipment_condition_reading_source: ShipmentConditionReadingSource;
 }
 
@@ -127,20 +127,10 @@ export interface TransportUnit {
     created_at: Date;
     updated_at: Date;
     type: string;
-}
-
-export interface Carrier_transport_unit {
-    id: number;
-    reference: string;
-    specific_tu_type_id: number;
-    specific_tu_type_type: string;
-    created_at: Date;
-    updated_at: Date;
     pseudo: boolean;
-    type: string;
 }
 
-export interface Event_date_log {
+export interface EventDateLog {
     reading: null; // When is the TU arriving / departing
     event_date: string; // When this prediction was made
     actual: boolean;

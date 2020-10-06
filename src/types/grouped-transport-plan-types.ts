@@ -29,7 +29,7 @@ export type SeaMovement = {
     arrival_date_history: Array<PredictedTimeLog> | null;
     departure_date_history: Array<PredictedTimeLog> | null; // temp null
     carrier: Entity | null;
-    carrier_transport_unit: TransportUnit | null;
+    carrier_transport_unit: TransportUnit;
     completed: boolean;
 };
 
