@@ -28,7 +28,7 @@
     "dependencies": {
         "@types/cors": "^2.8.8",
         "@types/cytoscape": "^3.14.8",
-        "@types/ioredis": "^4.17.5",
+        "@types/ioredis": "^4.17.6",
         "@types/randomstring": "^1.1.6",
         "@types/tesseract.js": "0.0.2",
         "@types/tough-cookie": "^4.0.0",
