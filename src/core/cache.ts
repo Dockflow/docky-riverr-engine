@@ -51,7 +51,7 @@ export async function getAll(): Promise<GraphDump[]> {
                 return e;
             }
         })
-        .filter((e: GraphDump | null) => e !== null)
+        .filter((e: GraphDump | null) => e != null && typeof e != 'undefined')
         .filter((e: GraphDump) => 'id' in e);
 
     return data as GraphDump[];

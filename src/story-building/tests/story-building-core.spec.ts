@@ -35,6 +35,38 @@ describe('Story Building specific ', () => {
             assert.equal(transportUnits[3].data.status_code.status_code, order[7]);
         }
     });
+    it('should not generate out of order milestones', async () => {
+        // given
+        const execContext = JSON.parse(fs.readFileSync(__dirname + '/test-files/test_ss_19.txt').toString());
+
+        // when
+        const cy = await new StoryBuildingCore().execute(execContext);
+        const startNode = EventAtLocationNode.all(cy)
+            .filter((e) => e.streamNodes('upstream').length === 0)
+            .sort((a, b) => {
+                const aCount = a.streamNodes('downstream').length;
+                const bCount = b.streamNodes('downstream').length;
+
+                return bCount - aCount;
+            })
+            .shift();
+        assert.ok(startNode);
+        if (!startNode) {
+            throw new Error('Startnode not OK');
+        }
+        let outOfBruges = false;
+
+        startNode.streamNodes('downstream').forEach((e) => {
+            if (e.data.location && !(e.data.location.name as string).toLowerCase().includes('brugge')) {
+                outOfBruges = true;
+            }
+
+            // If we are in bruges again, we have problem
+            if (outOfBruges && e.data.location) {
+                assert.ok((e.data.location.name as string).toLowerCase().includes('brugge') === false);
+            }
+        });
+    });
 
     it('replace node cannot have null eventdate ', async () => {
         // given
@@ -99,6 +131,28 @@ describe('Story Building specific ', () => {
                 .shift()
                 ?.streamNodes('downstream').length ?? 0,
             10,
+        );
+    });
+    it('should not skip intermediate locations', async () => {
+        // given
+        const execContext = JSON.parse(fs.readFileSync(__dirname + '/test-files/test_ss_17.txt').toString());
+
+        // when
+        const cy = await new StoryBuildingCore().execute(execContext);
+        assert.isAtLeast(
+            EventAtLocationNode.all(cy)
+                .filter((e) => e.streamNodes('upstream').length === 0)
+                .sort((a, b) => {
+                    const aCount = a.streamNodes('downstream').length;
+                    const bCount = b.streamNodes('downstream').length;
+
+                    return bCount - aCount;
+                })
+                .shift()
+                ?.streamNodes('downstream')
+                .filter((e) => e.data.location && (e.data.location.name as string).toLowerCase().includes('singapore'))
+                .length ?? 0,
+            1,
         );
     });
 });

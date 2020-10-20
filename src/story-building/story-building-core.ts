@@ -8,6 +8,7 @@ import { SSEventNode } from './nodes/ss-event-node';
 import { connectToNextEvent } from '../story-building/actions/connect-to-next-event';
 import { connectToNext24HoursEvent } from '../story-building/actions/connect-to-24hours-event';
 import { connectToNullEventdateEvent } from '../story-building/actions/connect-null-eventdate-event';
+import { DistanceCalculator } from '../core/distance-calculator';
 
 export class StoryBuildingCore {
     public async execute(execContext: ExecutionContext): Promise<cytoscape.Core> {
@@ -96,7 +97,13 @@ export class StoryBuildingCore {
                 let previousNode = e;
                 let previousLBN: LocationBorderNode | null = null;
                 downStreamNodes.forEach((n) => {
-                    if (n.data.location.id !== previousNode.data.location.id) {
+                    if (
+                        n.data.location.id !== previousNode.data.location.id &&
+                        DistanceCalculator.distanceinKilometers(
+                            n.data.location.point,
+                            previousNode.data.location.point,
+                        ) > 20
+                    ) {
                         // the previous was an outgoing and we are an incoming
                         const booking = booking_details
                             .filter(
@@ -114,6 +121,7 @@ export class StoryBuildingCore {
                                 source: nout.id,
                                 target: nin.id,
                                 carrier_transport_unit: nin.data.carrier_transport_unit,
+                                carrier: nin.data.carrier,
                                 type: LocationBorderNode.NEXT_LOCATION_EALN_EDGE,
                             },
                         });
@@ -122,6 +130,7 @@ export class StoryBuildingCore {
                                 data: {
                                     source: previousLBN.id,
                                     target: nout.id,
+                                    type: LocationBorderNode.INT_LOCATION_EALN_EDGE,
                                 },
                             });
                         }

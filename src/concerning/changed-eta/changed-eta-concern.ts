@@ -1,5 +1,6 @@
 import cytoscape from 'cytoscape';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
+import hash from 'object-hash';
 
 import { EventAtLocationNode } from '../../story-building/nodes/event-at-location-node';
 import { SSEventNode } from '../../story-building/nodes/ss-event-node';
@@ -7,127 +8,182 @@ import { TransportUnit } from '../../types/docky-shipment-status-types';
 import { ExecutionContext } from '../../types/execution-context';
 import { ChangedETALogEntry, UOTMChangedETASegment } from '../../types/uotm-changed-eta-segment';
 
-//Get the last event with eventCode
-
 export class ChangedETAConcern {
-    public static generateLogsfromLastLocationEvents(
-        cy: cytoscape.Core,
-        event: EventAtLocationNode,
-    ): ChangedETALogEntry[] {
-        let lastPredicted: string | null = null;
-        let logs: ChangedETALogEntry[] = [];
+    public static getETALogEntries(cy: cytoscape.Core, VAEvent: EventAtLocationNode): ChangedETALogEntry[] {
+        const VDEvent = this.getVesselDepartureEvent(VAEvent.data.transport_unit, cy);
+        // console.log('VA was at', VAEvent?.data.message ?? 'not set');
+        // console.log('VD was at', VDEvent?.data.event_date ?? 'not set');
 
-        logs = (event as EventAtLocationNode)
+        const logs = (VAEvent as EventAtLocationNode)
             .getIncomingSSEventNodeIds()
             .map((e) => {
                 return new SSEventNode({ data: cy.$id(e).data() }, cy);
             })
             .sort((a, b) => {
-                if (a.data.shipment_status.created_at === b.data.shipment_status.created_at) {
-                    return 0;
-                }
-                return moment(a.data.shipment_status.created_at) > moment(b.data.shipment_status.created_at) ? 1 : -1;
+                return +moment(a.data.shipment_status.created_at) - +moment(b.data.shipment_status.created_at);
             })
-            .reduce((carry, item) => {
-                if (!lastPredicted) {
-                    lastPredicted = item.data.shipment_status.event_date;
-                }
-                if (lastPredicted && lastPredicted !== item.data.shipment_status.event_date) {
-                    carry.push({
-                        previous: lastPredicted,
-                        new: item.data.shipment_status.event_date,
-                    });
-                    lastPredicted = item.data.shipment_status.event_date;
-                }
-                return carry;
-            }, [] as ChangedETALogEntry[]);
-        return logs;
+            .filter((e) => e.data.shipment_status.event_date != null)
+            .reduce(
+                (carry, item) => {
+                    // console.log('checking event created at ', item.data.shipment_status.created_at);
+                    if (carry.init_date && !carry.init_date.isSame(moment(item.data.shipment_status.event_date))) {
+                        const isBeforeVesselDeparture = VDEvent
+                            ? moment(item.data.shipment_status.created_at).isBefore(VDEvent.data.event_date)
+                            : true;
+                        carry.entries.push({
+                            previous_reading: carry.init_date.toISOString(),
+                            reading: item.data.shipment_status.event_date,
+                            event_date: item.data.shipment_status.created_at,
+                            in_transit_change: !isBeforeVesselDeparture,
+                            hash: '',
+                            valid_until: moment().toString(), // placeholder,
+                        });
+                    }
+                    if (carry.max_date) {
+                        carry.max_date = moment.max(moment(item.data.shipment_status.event_date), carry.max_date);
+                    } else {
+                        carry.max_date = moment(item.data.shipment_status.event_date);
+                    }
+                    carry.init_date = moment(item.data.shipment_status.event_date);
+                    return carry;
+                },
+                {
+                    entries: [] as ChangedETALogEntry[],
+                    max_date: null as Moment | null,
+                    init_date: null as Moment | null,
+                },
+            );
+
+        logs.entries.map((e, i) => {
+            if (e.in_transit_change && logs.max_date) {
+                e.valid_until = logs.max_date?.toISOString();
+            } else {
+                e.valid_until = VDEvent?.data.event_date ?? moment().add(1, 'weeks').toISOString();
+            }
+            e.hash = hash(i + '-' + +moment(e.previous_reading) + '-' + +moment(e.reading));
+            return e;
+        });
+
+        return logs.entries;
     }
 
-    public static firstEventLastLocation(tu: TransportUnit, cy: cytoscape.Core): EventAtLocationNode | null {
-        const lastEvents = EventAtLocationNode.all(cy).filter((e) => e.data.transport_unit.id === tu.id);
+    /**
+     * This function will return the VA event, or the first event at the last location, if no VA was found
+     * @param tu The TU to look for
+     * @param cy The story
+     */
+    public static getVesselArrivalEvent(tu: TransportUnit, cy: cytoscape.Core): EventAtLocationNode | null {
+        const latestVA =
+            EventAtLocationNode.all(cy)
+                .filter((e) => e.data.transport_unit.id === tu.id)
+                .filter((e) => e.data.status_code && e.data.status_code.status_code == 'VA')
+                .sort((event1, event2) => {
+                    return +moment(event1.data.event_date) - +moment(event2.data.event_date);
+                })
+                .pop() ?? null;
+        if (latestVA) {
+            return latestVA;
+        }
 
-        const getDestinationEventLocationId = lastEvents.sort((event1, event2) => {
-            return moment(event1.data.event_date) < moment(event2.data.event_date) ? 1 : -1;
-        })[0].data.location.id;
+        // Check for first event at last location if no VA
 
-        const getOriginEventLocationId = lastEvents.sort((event1, event2) => {
-            return moment(event1.data.event_date) < moment(event2.data.event_date) ? 1 : -1;
-        })[lastEvents.length - 1].data.location.id;
+        const multipleLocationsInvolved = EventAtLocationNode.all(cy)
+            .filter((e) => e.data.transport_unit.id === tu.id)
+            .sort((event1, event2) => {
+                return +moment(event1.data.event_date) - +moment(event2.data.event_date);
+            })
+            .reduce(
+                (carry, item) => {
+                    if (!item.data.location) {
+                        return carry;
+                    }
+                    if (carry.location_id !== 0 && item.data.location.id !== carry.location_id) {
+                        carry.multiple = true;
+                    }
+                    carry.location_id = item.data.location.id;
+                    return carry;
+                },
+                {
+                    multiple: false,
+                    location_id: 0,
+                },
+            );
 
-        if (getOriginEventLocationId === getDestinationEventLocationId) {
+        if (!multipleLocationsInvolved.multiple) {
             return null;
         }
-        const firstEventOfLastLocation = lastEvents
-            .filter((e) => {
-                return e.data.location.id === getDestinationEventLocationId;
-            })
-            .sort((event1, event2) => {
-                return moment(event1.data.event_date) > moment(event2.data.event_date) ? 1 : -1;
-            });
-        return firstEventOfLastLocation[0];
-    }
 
-    public static getLastEvents(eventCode: string, tu: TransportUnit, cy: cytoscape.Core): EventAtLocationNode | null {
-        const lastEvents = EventAtLocationNode.all(cy)
+        return (
+            EventAtLocationNode.all(cy)
+                .filter((e) => e.data.transport_unit.id === tu.id)
+                .filter((e) => {
+                    return e.data.location.id === multipleLocationsInvolved.location_id;
+                })
+                .sort((event1, event2) => {
+                    return +moment(event1.data.event_date) - +moment(event2.data.event_date);
+                })
+                .shift() ?? null
+        );
+    }
+    /**
+     * This function will return the VD event, or the last event at the first location, if no VD was found
+     * @param tu The TU to look for
+     * @param cy The story
+     */
+    public static getVesselDepartureEvent(tu: TransportUnit, cy: cytoscape.Core): EventAtLocationNode | null {
+        const firstVD =
+            EventAtLocationNode.all(cy)
+                .filter((e) => e.data.transport_unit.id === tu.id)
+                .filter((e) => e.data.status_code && e.data.status_code.status_code == 'VD')
+                .sort((event1, event2) => {
+                    return +moment(event1.data.event_date) - +moment(event2.data.event_date);
+                })
+                .shift() ?? null;
+        if (firstVD) {
+            return firstVD;
+        }
+
+        // Check for first event at last location if no VD
+
+        const multipleLocationsInvolved = EventAtLocationNode.all(cy)
             .filter((e) => e.data.transport_unit.id === tu.id)
-            .filter((e) => e.data.status_code.status_code === eventCode)
-            .filter((e) => {
-                // Check it's VA event on the milestone
-                return (
-                    e.streamNodes('downstream').filter((dsn) => dsn.data.status_code.status_code === eventCode)
-                        .length === 0
-                );
+            .sort((event1, event2) => {
+                return +moment(event1.data.event_date) - +moment(event2.data.event_date);
             })
-            .filter((e) => {
-                // It must be actual false or have actuals down the line
-                return (
-                    e.data.actual === false &&
-                    e.streamNodes('downstream').filter((dsn) => dsn.data.actual === true).length === 0
-                );
-            })
-            .pop();
-        return lastEvents ?? null;
-    }
-
-    public static generatLogsfromEvents(
-        cy: cytoscape.Core,
-        events: { va: EventAtLocationNode | undefined; uv: EventAtLocationNode | undefined },
-    ): ChangedETALogEntry[] {
-        let lastPredicted: string | null = null;
-        let logs: ChangedETALogEntry[] = [];
-        if (!events) return logs;
-        else if (!events.va && !events.uv) return logs;
-        else {
-            const eventList = events.va ? events.va : events.uv;
-            logs = (eventList as EventAtLocationNode)
-                .getIncomingSSEventNodeIds()
-                .map((e) => {
-                    return new SSEventNode({ data: cy.$id(e).data() }, cy);
-                })
-                .sort((a, b) => {
-                    if (a.data.shipment_status.created_at === b.data.shipment_status.created_at) {
-                        return 0;
+            .reduce(
+                (carry, item) => {
+                    if (!item.data.location) {
+                        return carry;
                     }
-                    return moment(a.data.shipment_status.created_at) > moment(b.data.shipment_status.created_at)
-                        ? 1
-                        : -1;
-                })
-                .reduce((carry, item) => {
-                    if (!lastPredicted) {
-                        lastPredicted = item.data.shipment_status.event_date;
+                    if (carry.location_id !== 0 && item.data.location.id !== carry.location_id) {
+                        carry.multiple = true;
                     }
-                    if (lastPredicted && lastPredicted !== item.data.shipment_status.event_date) {
-                        carry.push({
-                            previous: lastPredicted,
-                            new: item.data.shipment_status.event_date,
-                        });
-                        lastPredicted = item.data.shipment_status.event_date;
+                    if (carry.location_id === 0) {
+                        carry.location_id = item.data.location.id;
                     }
                     return carry;
-                }, [] as ChangedETALogEntry[]);
-            return logs;
+                },
+                {
+                    multiple: false,
+                    location_id: 0,
+                },
+            );
+
+        if (!multipleLocationsInvolved.multiple) {
+            return null;
         }
+
+        return (
+            EventAtLocationNode.all(cy)
+                .filter((e) => e.data.transport_unit.id === tu.id)
+                .filter((e) => {
+                    return e.data.location.id === multipleLocationsInvolved.location_id;
+                })
+                .sort((event1, event2) => {
+                    return +moment(event1.data.event_date) - +moment(event2.data.event_date);
+                })
+                .pop() ?? null
+        );
     }
 
     public static getSegments(cy: cytoscape.Core, execContext: ExecutionContext): UOTMChangedETASegment[] {
@@ -146,78 +202,31 @@ export class ChangedETAConcern {
     public static getChangedETAs(
         tu: TransportUnit,
         cy: cytoscape.Core,
-        execContext: ExecutionContext,
+        _execContext: ExecutionContext,
     ): UOTMChangedETASegment | null {
         //get first Event of last location which is alternative of vessel arrival
-        const lastLocationEvent: EventAtLocationNode | null = this.firstEventLastLocation(tu, cy);
+        const vesselArrivalEvent: EventAtLocationNode | null = this.getVesselArrivalEvent(tu, cy);
 
-        if (!lastLocationEvent) return null;
-
-        const eventsLogs: ChangedETALogEntry[] = this.generateLogsfromLastLocationEvents(cy, lastLocationEvent);
-
-        if (eventsLogs && eventsLogs.length === 0) {
+        if (!vesselArrivalEvent) {
             return null;
         }
 
-        const lowestDate: moment.Moment = (eventsLogs as ChangedETALogEntry[])
-            .reduce((carry, item) => {
-                if (item.new) {
-                    carry.push(moment(item.new));
-                }
-                if (item.previous) {
-                    carry.push(moment(item.previous));
-                }
-                return carry;
-            }, [] as moment.Moment[])
-            .reduce((carry, item) => {
-                if (carry == null) {
-                    return item;
-                }
-                return carry > item ? carry : item;
-            });
-        const highestDate: moment.Moment = (eventsLogs as ChangedETALogEntry[])
-            .reduce((carry, item) => {
-                if (item.new) {
-                    carry.push(moment(item.new));
-                }
-                if (item.previous) {
-                    carry.push(moment(item.previous));
-                }
-                return carry;
-            }, [] as moment.Moment[])
-            .reduce((carry, item) => {
-                if (carry == null) {
-                    return item;
-                }
-                return carry < item ? carry : item;
-            });
+        const eventsLogs: ChangedETALogEntry[] = this.getETALogEntries(cy, vesselArrivalEvent);
 
-        //delay limit set by user
-
-        const delay = execContext.config.eta_delay_in_hours ?? 12;
-
-        //eta event number limit set by user
-        // const etaChangesLimit = config.configuration.eta_changed_limit ?? 3;
-
-        const timeDelay = Math.abs(highestDate.diff(lowestDate, 'hours'));
-
-        //const etaChangesNumber = lastLocationEvent.getIncomingSSEventNodeIds().length;
-
-        const alert = timeDelay > delay;
-        //if no delay or too much eta events
-        if (!alert) {
+        if (eventsLogs.length === 0) {
             return null;
         }
-        // if eta changes multiple times or eta time delay is wide send alarm depending on severity nature
+        const lastAlert = eventsLogs[eventsLogs.length - 1];
         return {
             type: 'ChangedETA',
-            alert: alert,
+            current_alert: moment(lastAlert.valid_until).isAfter(moment()) ? lastAlert : null,
             log: eventsLogs,
-            location: lastLocationEvent.data.location || null,
+            carrier_transport_unit_id: +vesselArrivalEvent.data.carrier_transport_unit?.id ?? null,
+            carrier_transport_unit: vesselArrivalEvent.data.carrier_transport_unit,
+            location: vesselArrivalEvent.data.location ?? null,
+            location_id: +vesselArrivalEvent.data.location?.id ?? null,
             transport_unit: tu,
-            delta_in_seconds: highestDate.diff(lowestDate, 'seconds'),
-            eta_event_based: lastLocationEvent.data,
-            eta_changes_number: lastLocationEvent.getIncomingSSEventNodeIds().length,
+            transport_unit_id: +tu.id,
         };
     }
 }
