@@ -41,12 +41,14 @@ export class TPGeneration {
             const seaMovement: SeaMovement[] = [];
 
             const transportNodes = [...endingNode.streamNodes('upstream').reverse(), endingNode];
+            const carrierIdMap = new Set();
 
             // will get set of sea movements
             transportNodes
                 .filter((e) => e.data.moveType === 'OUT')
                 .forEach((out_node) => {
                     const in_node = transportNodes[transportNodes.indexOf(out_node) + 1];
+                    carrierIdMap.add(in_node.data.carrier.id);
                     seaMovement.push({
                         port_of_loading: out_node.data.location,
                         port_of_discharge: in_node.data.location,
@@ -60,14 +62,17 @@ export class TPGeneration {
                     } as SeaMovement);
                 });
 
-            // will recieve sea shipment of perticular container set
-            seaShipment.push({
-                carrier: endingNode.data.carrier,
-                type: 'SeaShipment',
-                booking_number: endingNode.data.booking_reference ? endingNode.data.booking_reference : null,
-                bill_of_lading_number: endingNode.data.booking_reference ? endingNode.data.booking_reference : null,
-                sea_shipment_legs: seaMovement,
-            } as SeaShipment); // missing TransportPlanLeg
+            // will catogories each sea movement under carrier id and added to tp legs.
+            carrierIdMap.forEach((carrierId) => {
+                const seaMovements = seaMovement.filter((e) => e.carrier?.id === carrierId);
+                seaShipment.push({
+                    carrier: seaMovements[0].carrier,
+                    type: 'SeaShipment',
+                    booking_number: endingNode.data.booking_reference ? endingNode.data.booking_reference : null,
+                    bill_of_lading_number: endingNode.data.booking_reference ? endingNode.data.booking_reference : null,
+                    sea_shipment_legs: seaMovements,
+                } as SeaShipment); // missing TransportPlanLeg
+            });
 
             tp_shipment.push({
                 containers: TPGeneration.getContainers(endingNode),

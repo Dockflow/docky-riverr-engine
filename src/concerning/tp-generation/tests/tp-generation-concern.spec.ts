@@ -121,11 +121,11 @@ describe('Transport Plan concern ', () => {
     });
 
     /*
-In this scenario we have three containers with two transport jouerney.
-Other ctonaer ( TEMU4846097) starting from  BR  and going to BE
-Two containers (TLLU2559118, FCIU6574990 ) starting from  BR and going to NL and use BE as a transhipment location.
-So both Cotainers Starting from same location but we have only one Location Node which has move type as 'OUT'.
-*/
+    In this scenario we have three containers with two transport jouerney.
+    Other ctonaer ( TEMU4846097) starting from  BR  and going to BE
+    Two containers (TLLU2559118, FCIU6574990 ) starting from  BR and going to NL and use BE as a transhipment location.
+    So both Cotainers Starting from same location but we have only one Location Node which has move type as 'OUT'.
+    */
     it('mulitple transport plan get in & out of locations with extend destinations', async () => {
         // given
         const execContext = JSON.parse(
@@ -156,4 +156,33 @@ So both Cotainers Starting from same location but we have only one Location Node
             assert.ok(node.shipments[1].transport_plan_legs[0].sea_shipment_legs.length === 1);
         });
     });
+
+    /*
+    In this scenario we have 11 containers with one transport jouerney.
+    All should go VN --> VN --> NL --> NL
+    Here We use one carrier to transport containers from VN --> VN and VN--> VL
+    Another another carrier to transport containers from NL --> NL
+    Which means two tp legs and one with 2 sea legs and another one with 1 sea leg.
+    */
+    it('single transport plan with mutiple sea shipments', async () => {
+        // given
+        const execContext = JSON.parse(
+            fs.readFileSync(__dirname + '/test-files/41960_single_tp_multiple_seaShipments.txt').toString(),
+        );
+        const cy = await new StoryBuildingCore().execute(execContext);
+
+        //when
+        const segments: UOTMTransportPlanSegment[] = TPGeneration.getSegments(cy);
+        //then
+        assert.ok(segments.length === 1);
+        segments.forEach((node) => {
+            assert.ok(node.type === 'TransportPlan');
+            assert.ok(node.shipments.length == 1);
+
+            assert.ok(node.shipments[0].containers.length == 11);
+            assert.ok(node.shipments[0].transport_plan_legs.length == 2);
+            assert.ok(node.shipments[0].transport_plan_legs[0].sea_shipment_legs.length === 2);
+            assert.ok(node.shipments[0].transport_plan_legs[1].sea_shipment_legs.length === 1);
+        });
+    }).timeout(4000);
 });
