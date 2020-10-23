@@ -57,7 +57,7 @@ describe('Story Building Core concern ', () => {
 
         await Promise.all(promises);
         assert.ok(true);
-    }).timeout(10000);
+    }).timeout(30000);
 
     it('should create collection of one or more elements (nodes and edges)', async () => {
         // given
