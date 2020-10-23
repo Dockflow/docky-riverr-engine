@@ -48,7 +48,9 @@ export class TPGeneration {
                 .filter((e) => e.data.moveType === 'OUT')
                 .forEach((out_node) => {
                     const in_node = transportNodes[transportNodes.indexOf(out_node) + 1];
-                    carrierIdMap.add(in_node.data.carrier.id);
+                    if (in_node.data.carrier) {
+                        carrierIdMap.add(in_node.data.carrier.id);
+                    }
                     seaMovement.push({
                         port_of_loading: out_node.data.location,
                         port_of_discharge: in_node.data.location,
