@@ -184,5 +184,5 @@ describe('Transport Plan concern ', () => {
             assert.ok(node.shipments[0].transport_plan_legs[0].sea_shipment_legs.length === 2);
             assert.ok(node.shipments[0].transport_plan_legs[1].sea_shipment_legs.length === 1);
         });
-    }).timeout(30000);
+    });
 });
