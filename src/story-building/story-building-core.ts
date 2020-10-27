@@ -9,7 +9,6 @@ import { connectToNextEvent } from '../story-building/actions/connect-to-next-ev
 import { connectToNext24HoursEvent } from '../story-building/actions/connect-to-24hours-event';
 import { connectToNullEventdateEvent } from '../story-building/actions/connect-null-eventdate-event';
 import { DistanceCalculator } from '../core/distance-calculator';
-import { logger } from '../core/logger';
 
 export class StoryBuildingCore {
     public async execute(execContext: ExecutionContext): Promise<cytoscape.Core> {
@@ -58,31 +57,25 @@ export class StoryBuildingCore {
         });
 
         // Connect each event to the next event
-        let startTime = new Date();
         EventAtLocationNode.all(cy)
             .sort(EventAtLocationNode.sortByNaturalShipmentOrder)
             .forEach((e) => {
                 connectToNextEvent(e);
             });
-        this.logs('connectToNextEvent', startTime, execContext.tradeflow_id);
 
         // Connect each event to the next event within 24 hours
-        startTime = new Date();
         EventAtLocationNode.all(cy)
             .filter((e) => e.streamNodes('upstream').length === 0)
             .forEach((e) => {
                 connectToNext24HoursEvent(e);
             });
-        this.logs('connectToNext24HoursEvent', startTime, execContext.tradeflow_id);
 
         // Connect each event to the null events
-        startTime = new Date();
         EventAtLocationNode.all(cy)
             .filter((e) => e.streamNodes('upstream').length === 0)
             .forEach((e) => {
                 connectToNullEventdateEvent(e);
             });
-        this.logs('connectToNext24HoursEvent', startTime, execContext.tradeflow_id);
 
         // Set downstream actuals consistently
         // EventAtLocationNode.all(cy).forEach((e) => {
@@ -151,16 +144,5 @@ export class StoryBuildingCore {
         EventAtLocationNode.all(cy).forEach((e) => e.finalStyling());
 
         return cy;
-    }
-
-    logs(name: string, startTime: Date, id: string): void {
-        const stopTime = new Date();
-        logger.debug({
-            message: `Time Interval for execute Function : ${name}`,
-            tradeflowId: id,
-            startTime: startTime,
-            stopTime: stopTime,
-            duration: +(stopTime.getTime() - startTime.getTime()),
-        });
     }
 }

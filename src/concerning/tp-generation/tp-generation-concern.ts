@@ -11,11 +11,23 @@ export class TPGeneration {
 
     public static getTransportPlanSegment(cy: cytoscape.Core): UOTMTransportPlanSegment {
         const tp_shipment: TPShipment[] = [];
-        let endingNodes: LocationBorderNode[] = [];
+        const endingNodes: LocationBorderNode[] = LocationBorderNode.all(cy).filter(
+            (e) => e.streamNodes('downstream').length === 0,
+        );
 
-        endingNodes = LocationBorderNode.all(cy).filter((e) => e.streamNodes('downstream').length === 0);
+        const starting_containers = LocationBorderNode.all(cy)
+            .filter((e) => e.streamNodes('upstream').length === 0)
+            .reduce((starting_containers, end_node) => {
+                starting_containers += end_node.data.containers.length;
+                return starting_containers;
+            }, 0);
 
-        if (TPGeneration.hasExtendedTransportPlans(cy, endingNodes)) {
+        let ending_containers = endingNodes.reduce((ending_containers, end_node) => {
+            ending_containers += end_node.data.containers.length;
+            return ending_containers;
+        }, 0);
+
+        if (starting_containers > ending_containers) {
             /*
             here we have all the start and end nodes but some containers will be missing in between those tp.
             So we go each end_node and check that any other container left before this end_node. if we have that means that containers
@@ -28,10 +40,11 @@ export class TPGeneration {
                     if (node.data.moveType == 'IN' && node_containers < node.data.containers.length) {
                         // which means here we have a end node of a tp
                         endingNodes.push(node);
+                        ending_containers += node.data.containers.length - node_containers;
                         node_containers = node.data.containers.length;
                     }
 
-                    if (!TPGeneration.hasExtendedTransportPlans(cy, endingNodes)) return;
+                    if (starting_containers <= ending_containers) return;
                 });
             });
         }
@@ -86,28 +99,6 @@ export class TPGeneration {
             type: 'TransportPlan',
             shipments: tp_shipment,
         };
-    }
-
-    /*
-    if we have all the tp of each container then starting node containers and ending node containers
-    should be equal. else starting node_containers greater than ending node_containers.
-    */
-    public static hasExtendedTransportPlans(cy: cytoscape.Core, endingNodes: LocationBorderNode[]): boolean {
-        const ending_containers = endingNodes
-            .filter((e) => e.streamNodes('downstream').length === 0)
-            .reduce((ending_containers, end_node) => {
-                ending_containers += end_node.data.containers.length;
-                return ending_containers;
-            }, 0);
-
-        const starting_containers = LocationBorderNode.all(cy)
-            .filter((e) => e.streamNodes('upstream').length === 0)
-            .reduce((starting_containers, end_node) => {
-                starting_containers += end_node.data.containers.length;
-                return starting_containers;
-            }, 0);
-
-        return starting_containers > ending_containers;
     }
 
     /*
