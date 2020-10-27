@@ -2,6 +2,7 @@ import { assert } from 'chai';
 import fs from 'fs';
 import { StoryBuildingCore } from '../story-building/story-building-core';
 import { EventAtLocationNode } from '../story-building/nodes/event-at-location-node';
+import { Orchestrator } from '../orchestrator/orchestrator';
 
 describe('Story Building Core concern ', () => {
     it('should create component', async () => {
@@ -16,7 +17,7 @@ describe('Story Building Core concern ', () => {
     });
 
     it('basic tests for story', async () => {
-        const promises = [...Array(29).keys()].map(async (key) => {
+        const promises = [...Array(30).keys()].map(async (key) => {
             if (key === 0) {
                 return true;
             }
@@ -51,6 +52,28 @@ describe('Story Building Core concern ', () => {
             }, false);
 
             assert.isFalse(duplicates, 'Duplicate IN/OUT for key ' + key);
+
+            return true;
+        });
+
+        await Promise.all(promises);
+        assert.ok(true);
+    }).timeout(30 * 2000); // timeout is allowed here because the test duration goes up with the amount of tfs tested
+
+    it('basic full test for tf', async () => {
+        const promises = ['29'].map(async (key) => {
+            // given
+            const execContext = JSON.parse(fs.readFileSync('assets/test-files/test_ss_' + key + '.txt').toString());
+
+            // when
+            const cy = await new Orchestrator().execute({
+                shipment_statuses: execContext.shipment_statuses,
+                tradeflow_id: '41365',
+                config: {},
+            });
+
+            // then
+            assert.ok(cy);
 
             return true;
         });
