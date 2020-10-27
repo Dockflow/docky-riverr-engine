@@ -39,8 +39,7 @@ export class ConcerningCore {
         return uotm;
     }
 
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    logs(name: string, startTime: Date, id: string) {
+    logs(name: string, startTime: Date, id: string): void {
         const stopTime = new Date();
         logger.debug({
             message: ` Time Interval for execute Function :  ${name}`,

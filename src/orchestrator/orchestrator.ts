@@ -35,8 +35,7 @@ export class Orchestrator {
         return concerns;
     }
 
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    logs(name: string, startTime: Date, id: string) {
+    logs(name: string, startTime: Date, id: string): void {
         const stopTime = new Date();
         logger.debug({
             message: ` Time Interval for execute Core :  ${name}`,
