@@ -31,14 +31,6 @@ export class InfluxCore implements GraphyServerPlugin {
                 res.json(result);
                 res.status(200);
                 res.end();
-                const stopTime = new Date();
-                logger.debug({
-                    message: 'Stopped executing GraphTP cycle',
-                    tradeflowId: (req.body as RequestContext).tradeflow_id,
-                    startTime: startTime,
-                    stopTime: stopTime,
-                    duration: +(stopTime.getTime() - startTime.getTime()),
-                });
             })
             .catch((e) => {
                 res.json(false);
@@ -48,6 +40,14 @@ export class InfluxCore implements GraphyServerPlugin {
             })
             .finally(() => {
                 clearInterval(interval);
+                const stopTime = new Date();
+                logger.debug({
+                    message: 'Stopped executing GraphTP cycle',
+                    tradeflowId: (req.body as RequestContext).tradeflow_id,
+                    startTime: startTime,
+                    stopTime: stopTime,
+                    duration: +(stopTime.getTime() - startTime.getTime()),
+                });
             });
         return;
     }
