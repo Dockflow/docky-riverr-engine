@@ -1,7 +1,6 @@
 import { SeaShipment, TPShipment, SeaMovement, PredictedTimeLog } from '../../types/grouped-transport-plan-types';
-import { LocationBorderNode } from '../../story-building/nodes/location-border-node';
 import { UOTMTransportPlanSegment } from '../../types/uotm-transportplan-segment';
-import { TransportUnit } from '../../types/docky-shipment-status-types';
+import { StoryBuildingCore } from '../../story-building/story-building-core';
 
 export class TPGeneration {
     public static getSegments(cy: cytoscape.Core): UOTMTransportPlanSegment[] {
@@ -11,45 +10,9 @@ export class TPGeneration {
 
     public static getTransportPlanSegment(cy: cytoscape.Core): UOTMTransportPlanSegment {
         const tp_shipment: TPShipment[] = [];
-        const endingNodes: LocationBorderNode[] = LocationBorderNode.all(cy).filter(
-            (e) => e.streamNodes('downstream').length === 0,
-        );
+        const storyBuildingCore = new StoryBuildingCore();
 
-        const starting_containers = LocationBorderNode.all(cy)
-            .filter((e) => e.streamNodes('upstream').length === 0)
-            .reduce((starting_containers, end_node) => {
-                starting_containers += end_node.data.containers.length;
-                return starting_containers;
-            }, 0);
-
-        let ending_containers = endingNodes.reduce((ending_containers, end_node) => {
-            ending_containers += end_node.data.containers.length;
-            return ending_containers;
-        }, 0);
-
-        if (starting_containers > ending_containers) {
-            /*
-            here we have all the start and end nodes but some containers will be missing in between those tp.
-            So we go each end_node and check that any other container left before this end_node. if we have that means that containers
-            should have seperate tp.so we add that as another end_node.
-            */
-            [...endingNodes].forEach((endingNode) => {
-                let node_containers = endingNode.data.containers.length;
-                [...endingNode.streamNodes('upstream').reverse()].forEach((node) => {
-                    // check from end to start
-                    if (node.data.moveType == 'IN' && node_containers < node.data.containers.length) {
-                        // which means here we have a end node of a tp
-                        endingNodes.push(node);
-                        ending_containers += node.data.containers.length - node_containers;
-                        node_containers = node.data.containers.length;
-                    }
-
-                    if (starting_containers <= ending_containers) return;
-                });
-            });
-        }
-
-        endingNodes.forEach((endingNode) => {
+        storyBuildingCore.getAllBorderNodes(cy).forEach((endingNode) => {
             const seaShipment: SeaShipment[] = [];
             const seaMovement: SeaMovement[] = [];
 
@@ -90,7 +53,7 @@ export class TPGeneration {
             });
 
             tp_shipment.push({
-                containers: TPGeneration.getContainers(endingNode),
+                containers: storyBuildingCore.getContainers(endingNode),
                 transport_plan_legs: seaShipment,
             });
         });
@@ -99,18 +62,6 @@ export class TPGeneration {
             type: 'TransportPlan',
             shipments: tp_shipment,
         };
-    }
-
-    /*
-    Here we check ending Node has next Node containers if there's any then we filter it.
-    */
-    public static getContainers(endingNode: LocationBorderNode): TransportUnit[] {
-        if (endingNode.streamNodes('downstream').length === 0) return endingNode.data.containers;
-
-        const donwstream_containers = endingNode.streamNodes('downstream')?.[0].data.containers;
-        return endingNode.data.containers.filter((x: TransportUnit) => {
-            if (donwstream_containers.filter((e: TransportUnit) => e.reference === x.reference).length == 0) return x;
-        });
     }
 
     static findEventDate(event_date_log: PredictedTimeLog[]): string | null {
