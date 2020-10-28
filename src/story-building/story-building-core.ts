@@ -9,6 +9,7 @@ import { connectToNextEvent } from '../story-building/actions/connect-to-next-ev
 import { connectToNext24HoursEvent } from '../story-building/actions/connect-to-24hours-event';
 import { connectToNullEventdateEvent } from '../story-building/actions/connect-null-eventdate-event';
 import { DistanceCalculator } from '../core/distance-calculator';
+import { TransportUnit } from '../types/docky-shipment-status-types';
 
 export class StoryBuildingCore {
     public async execute(execContext: ExecutionContext): Promise<cytoscape.Core> {
@@ -144,5 +145,60 @@ export class StoryBuildingCore {
         EventAtLocationNode.all(cy).forEach((e) => e.finalStyling());
 
         return cy;
+    }
+    /*
+    Here we collect all ending nodes of all sea shipments.
+    */
+    public getAllBorderNodes(cy: cytoscape.Core): LocationBorderNode[] {
+        const endingNodes: LocationBorderNode[] = LocationBorderNode.all(cy).filter(
+            (e) => e.streamNodes('downstream').length === 0,
+        );
+
+        const starting_containers = LocationBorderNode.all(cy)
+            .filter((e) => e.streamNodes('upstream').length === 0)
+            .reduce((starting_containers, end_node) => {
+                starting_containers += end_node.data.containers.length;
+                return starting_containers;
+            }, 0);
+
+        let ending_containers = endingNodes.reduce((ending_containers, end_node) => {
+            ending_containers += end_node.data.containers.length;
+            return ending_containers;
+        }, 0);
+
+        if (starting_containers > ending_containers) {
+            /*
+            here we have all the start and end nodes but some containers will be missing in between those tp.
+            So we go each end_node and check that any other container left before this end_node. if we have that means that containers
+            should have seperate tp.so we add that as another end_node.
+            */
+            [...endingNodes].forEach((endingNode) => {
+                let node_containers = endingNode.data.containers.length;
+                [...endingNode.streamNodes('upstream').reverse()].forEach((node) => {
+                    // check from end to start
+                    if (node.data.moveType == 'IN' && node_containers < node.data.containers.length) {
+                        // which means here we have a end node of a tp
+                        endingNodes.push(node);
+                        ending_containers += node.data.containers.length - node_containers;
+                        node_containers = node.data.containers.length;
+                    }
+
+                    if (starting_containers <= ending_containers) return;
+                });
+            });
+        }
+        return endingNodes;
+    }
+
+    /*
+    Here we check ending Node has next Node containers if there's any then we filter it.
+    */
+    public getContainers(endingNode: LocationBorderNode): TransportUnit[] {
+        if (endingNode.streamNodes('downstream').length === 0) return endingNode.data.containers;
+
+        const donwstream_containers = endingNode.streamNodes('downstream')?.[0].data.containers;
+        return endingNode.data.containers.filter((x: TransportUnit) => {
+            if (donwstream_containers.filter((e: TransportUnit) => e.reference === x.reference).length == 0) return x;
+        });
     }
 }
