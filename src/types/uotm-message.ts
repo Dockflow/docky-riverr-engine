@@ -1,4 +1,4 @@
-import { TransportSegment } from "./transportSegment";
+import { TransportSegment } from './transportSegment';
 
 export type UOTMMessage = {
     hash: string;

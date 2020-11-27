@@ -17,38 +17,41 @@ export class ConcerningCore {
                 return item.id.toString();
             }, '');
         }
-        [1,2,3].map(async (key) => {
-            let travelInfo : TravelInfo[] = [];
+        [1, 2, 3].map(async (key) => {
+            const travelInfo: TravelInfo[] = [];
             let carrier: Vessel | null = null;
             let current_speed = '';
+            let current_location = '';
             let expected_speed = '';
             let expected_waiting = '';
-            cy.edges().filter((e) =>{
+            cy.edges().filter((e) => {
                 return e.data().vesselInfo.forEach((element: VesselInfomation) => {
-                    if (element.Carrier && element.Carrier.id === key){
+                    if (element.Carrier && element.Carrier.id === key) {
                         element.TravelInfo.CorridorName = e.data().corridor_name;
                         travelInfo.push(element.TravelInfo as TravelInfo);
                         carrier = element.Carrier;
-                        if(element.TravelInfo.Current_Speed) {current_speed = element.TravelInfo.Current_Speed;
-                            expected_speed= element.TravelInfo.Expected_Speed;
-                            expected_waiting= element.TravelInfo.Expected_waiting_time;}
+                        if (element.TravelInfo.Current_Speed) {
+                            current_speed = element.TravelInfo.Current_Speed;
+                            expected_speed = element.TravelInfo.Expected_Speed;
+                            current_location = element.TravelInfo.CorridorName ? element.TravelInfo.CorridorName : '';
+                            expected_waiting = element.TravelInfo.Expected_waiting_time;
+                        }
                     }
                 });
-
             });
             segments.push({
-                vessel: carrier? carrier : null,
-    current_speed: current_speed,
-    expected_speed: expected_speed,
-    travel_path: travelInfo,
-    next_waitingTime: expected_waiting
-} as TransportSegment);
+                vessel: carrier ? carrier : null,
+                current_speed: current_speed,
+                current_corridor_location: current_location,
+                expected_speed: expected_speed,
+                travel_path: travelInfo,
+                next_waitingTime: expected_waiting,
+            } as TransportSegment);
         });
-
 
         const uotm = {
             tradeflow_id: execContext.tradeflow_id,
-            segments: segments.filter((e)=> e.vessel !== null),
+            segments: segments.filter((e) => e.vessel !== null),
             hash: '--placeholder--',
         } as UOTMMessage;
         uotm.hash = sha1(uotm);

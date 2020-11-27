@@ -13,7 +13,7 @@ export type TransportPlanLeg = {
 };
 
 export type SeaShipment = TransportPlanLeg & {
-    carrier:null;
+    carrier: null;
     type: 'SeaShipment';
     booking_number: string | null;
     bill_of_lading_number: string | null;

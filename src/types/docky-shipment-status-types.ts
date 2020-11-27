@@ -1,7 +1,7 @@
 export type Vessel = {
     id: number;
-    port_of_loading: number;
-    port_of_discharge: number;
+    port_of_loading: string;
+    port_of_discharge: string;
     departure_date: string | null;
     arrival_date: string | null;
     carrier: string;
@@ -17,13 +17,13 @@ export type TravelInfo = {
     Expected_Speed: string;
     Expected_waiting_time: string;
     CorridorName: string | null;
-}
+};
 
 export type Locks = {
     id: number;
     location: Location;
     waiting_time: number;
-    lock: boolean;
+    lock: string;
 };
 export interface Location {
     id: number;
@@ -31,17 +31,7 @@ export interface Location {
     type: string;
     reference: string;
     geolocation: Geolocation;
-    raw_location_type: string;
-    raw_location_id: number;
-    address_line: null;
-    postal_code: null;
-    country_id: number;
-    created_at: null;
-    updated_at: Date;
-    timezone: string;
-    fullAddress: string;
-    point: Point;
-    country: Country;
+    country: string;
 }
 
 export interface Country {
