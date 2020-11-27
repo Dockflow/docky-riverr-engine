@@ -1,50 +1,30 @@
-export interface DockyShipmentStatus {
+export type Vessel = {
     id: number;
-    message: string;
-    specific_status_type: string;
-    specific_status_id: number;
-    event_date: Date;
-    created_at: Date;
-    updated_at: Date;
-    tradeflow_id: number;
-    shipment_condition_reading_source_id: number;
-    transport_unit_id: number;
-    location_id: number;
-    actual: boolean;
-    carrier_entity_id: number;
-    carrier_transport_unit_id: null;
-    cargo_id: null;
-    document_id: null;
-    status_code_id: number;
-    user_id: null;
-    mute: boolean;
-    log_level_id: null;
-    specific_status: SpecificStatus;
-    status_code: StatusCode;
-    carrier: Carrier;
+    port_of_loading: number;
+    port_of_discharge: number;
+    departure_date: string | null;
+    arrival_date: string | null;
+    carrier: string;
+};
+
+export type VesselInfomation = {
+    Carrier: Vessel;
+    TravelInfo: TravelInfo;
+};
+
+export type TravelInfo = {
+    Current_Speed: string | null;
+    Expected_Speed: string;
+    Expected_waiting_time: string;
+    CorridorName: string | null;
+}
+
+export type Locks = {
+    id: number;
     location: Location;
-    transport_unit: TransportUnit;
-    carrier_transport_unit: TransportUnit;
-    shipment_condition_reading_source: ShipmentConditionReadingSource;
-}
-
-export interface Carrier {
-    id: number;
-    name: string;
-    name_short: null;
-    legal_form: null;
-    registered_office_address_id: null;
-    created_at: null;
-    updated_at: null;
-    entity_profile_information_id: null;
-    vat_registry_id: null;
-    vat_registration_reference: string;
-    vetted: number;
-    prefered_language_code: string;
-    onboarding_completed: boolean;
-    is_admin_entity: boolean;
-}
-
+    waiting_time: number;
+    lock: boolean;
+};
 export interface Location {
     id: number;
     name: string;
@@ -98,27 +78,6 @@ export interface ShipmentConditionReadingSource {
     reference: string;
     device: null;
 }
-
-export interface SpecificStatus {
-    id: number;
-    created_at: Date;
-    updated_at: Date;
-    data_reference: string;
-    subscription_id: string;
-    raw_attribute: string;
-    raw_filetype: string;
-    booking_reference: string | null;
-    bill_of_lading_reference: string | null;
-}
-
-export interface StatusCode {
-    id: number;
-    message: string;
-    status_code: string;
-    created_at: null;
-    updated_at: null;
-}
-
 export interface TransportUnit {
     id: number;
     reference: string;
@@ -128,10 +87,4 @@ export interface TransportUnit {
     updated_at: Date;
     type: string;
     pseudo: boolean;
-}
-
-export interface EventDateLog {
-    reading: null; // When is the TU arriving / departing
-    event_date: string; // When this prediction was made
-    actual: boolean;
 }

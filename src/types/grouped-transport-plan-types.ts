@@ -1,5 +1,4 @@
 import { Location, TransportUnit } from './docky-shipment-status-types';
-import { Entity } from './entity';
 
 export type PredictedTimeLog = {
     reading: string | null; // When is the TU arriving / departing      // temp null
@@ -14,7 +13,7 @@ export type TransportPlanLeg = {
 };
 
 export type SeaShipment = TransportPlanLeg & {
-    carrier: Entity | null;
+    carrier:null;
     type: 'SeaShipment';
     booking_number: string | null;
     bill_of_lading_number: string | null;
@@ -28,7 +27,7 @@ export type SeaMovement = {
     arrival_date: string | null;
     arrival_date_history: Array<PredictedTimeLog> | null;
     departure_date_history: Array<PredictedTimeLog> | null; // temp null
-    carrier: Entity | null;
+    carrier: null;
     carrier_transport_unit: TransportUnit;
     completed: boolean;
 };
@@ -37,3 +36,5 @@ export type TPShipment = {
     containers: Array<TransportUnit>;
     transport_plan_legs: Array<SeaShipment>;
 };
+
+////////// INPUT TYPE /////////////

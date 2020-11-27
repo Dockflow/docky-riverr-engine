@@ -1,34 +1,54 @@
 import { sha1 } from 'object-hash';
+import { TravelInfo, Vessel, VesselInfomation } from '../types/docky-shipment-status-types';
 
 import { ExecutionContext } from '../types/execution-context';
+import { TransportSegment } from '../types/transportSegment';
 import { UOTMMessage } from '../types/uotm-message';
-import { UOTMSegment } from '../types/uotm-segment';
-import { ContainerMilestonesConcern } from './container-milestones-concern';
-import { ChangedETAConcern } from './changed-eta/changed-eta-concern';
-import { TPGeneration } from './tp-generation/tp-generation-concern';
-
 export class ConcerningCore {
     public async execute(cy: cytoscape.Core, execContext: ExecutionContext): Promise<UOTMMessage> {
         /**
          * Add the general header with identy-info
          */
-        const segments: UOTMSegment[] = [];
+        const segments: TransportSegment[] = [];
 
         // Dirty-fix the tradeflow-id
         if (!execContext.tradeflow_id) {
-            execContext.tradeflow_id = execContext.shipment_statuses.reduce((carry, item) => {
-                return item.tradeflow_id.toString();
+            execContext.tradeflow_id = execContext.locks.reduce((carry, item) => {
+                return item.id.toString();
             }, '');
         }
+        [1,2,3].map(async (key) => {
+            let travelInfo : TravelInfo[] = [];
+            let carrier: Vessel | null = null;
+            let current_speed = '';
+            let expected_speed = '';
+            let expected_waiting = '';
+            cy.edges().filter((e) =>{
+                return e.data().vesselInfo.forEach((element: VesselInfomation) => {
+                    if (element.Carrier && element.Carrier.id === key){
+                        element.TravelInfo.CorridorName = e.data().corridor_name;
+                        travelInfo.push(element.TravelInfo as TravelInfo);
+                        carrier = element.Carrier;
+                        if(element.TravelInfo.Current_Speed) {current_speed = element.TravelInfo.Current_Speed;
+                            expected_speed= element.TravelInfo.Expected_Speed;
+                            expected_waiting= element.TravelInfo.Expected_waiting_time;}
+                    }
+                });
 
-        //segments.push(...DetentionDemurrageConcern.getSegments(cy, id));
-        segments.push(...ContainerMilestonesConcern.getSegments(cy, execContext));
-        segments.push(...ChangedETAConcern.getSegments(cy, execContext));
-        segments.push(...TPGeneration.getSegments(cy));
+            });
+            segments.push({
+                vessel: carrier? carrier : null,
+    current_speed: current_speed,
+    expected_speed: expected_speed,
+    travel_path: travelInfo,
+    next_waitingTime: expected_waiting
+} as TransportSegment);
+        });
+
 
         const uotm = {
             tradeflow_id: execContext.tradeflow_id,
-            segments: segments,
+            segments: segments.filter((e)=> e.vessel !== null),
             hash: '--placeholder--',
         } as UOTMMessage;
         uotm.hash = sha1(uotm);

@@ -1,7 +1,7 @@
-import { UOTMSegment } from './uotm-segment';
+import { TransportSegment } from "./transportSegment";
 
 export type UOTMMessage = {
     hash: string;
-    segments: UOTMSegment[];
+    segments: TransportSegment[];
     tradeflow_id: string | number | null;
 };

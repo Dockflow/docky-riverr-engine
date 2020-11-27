@@ -3,6 +3,7 @@ import { logger } from '../core/logger';
 
 import { GraphyServer } from '../core/server';
 import { Orchestrator } from '../orchestrator/orchestrator';
+import { Locks } from '../types/docky-shipment-status-types';
 import { RequestContext } from '../types/execution-context';
 import { GraphyServerPlugin } from '../types/graphyServerPlugin';
 
@@ -15,7 +16,7 @@ export class InfluxCore implements GraphyServerPlugin {
         const startTime = new Date();
         logger.debug({
             message: 'Started executing GraphTP cycle',
-            tradeflowId: (req.body as RequestContext).tradeflow_id,
+            tradeflowId: (req.body as Locks).id,
             startTime: startTime,
         });
         const interval = setInterval(() => {

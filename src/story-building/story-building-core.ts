@@ -1,204 +1,218 @@
-import cytoscape from 'cytoscape';
+import cytoscape, { EdgeDefinition } from 'cytoscape';
 
 import { ExecutionContext } from '../types/execution-context';
-import { EventAtLocationNode } from './nodes/event-at-location-node';
-import { LocationBorderNode } from './nodes/location-border-node';
 import { LocationNode } from './nodes/location-node';
 import { SSEventNode } from './nodes/ss-event-node';
-import { connectToNextEvent } from '../story-building/actions/connect-to-next-event';
-import { connectToNext24HoursEvent } from '../story-building/actions/connect-to-24hours-event';
-import { connectToNullEventdateEvent } from '../story-building/actions/connect-null-eventdate-event';
-import { DistanceCalculator } from '../core/distance-calculator';
-import { TransportUnit } from '../types/docky-shipment-status-types';
+import {TravelInfo, Vessel, VesselInfomation } from '../types/docky-shipment-status-types';
 
 export class StoryBuildingCore {
+    DECLARING_SS_EDGE_TYPE: any = '_CORRIDOR';
     public async execute(execContext: ExecutionContext): Promise<cytoscape.Core> {
         const cy = cytoscape();
         /**
          * First we will add all locations
          */
-        execContext.shipment_statuses
-            .filter((e) => e.location !== null)
-            .forEach((ss) => {
-                LocationNode.firstOrCreate(ss.location, cy);
-            });
 
         // Then we add all events that have locations to the correct locations
-
-        execContext.shipment_statuses
+let sseventNodes : SSEventNode[] = [];
+        execContext.locks
             .filter((e) => e.location !== null)
             .forEach((ss) => {
-                const location = LocationNode.firstOrCreate(ss.location, cy);
-                SSEventNode.create(ss, { parent: location.id }, cy);
+            //    if(index === 0) LocationNode.firstOrCreate(ss.location, cy);
+               sseventNodes.push(SSEventNode.create(ss, { parent: 12 }, cy));
             });
 
-        // Make event-nodes per TU and per location and attach the basic SSs
-        execContext.shipment_statuses
-            .filter(
-                (e) =>
-                    e.location !== null &&
-                    e.transport_unit !== null &&
-                    e.status_code !== null &&
-                    e.status_code.status_code !== '--',
-            )
-            .forEach((ss) => {
-                EventAtLocationNode.createFromShipmentStatus(ss, cy);
-            });
+            const vesselInput : Vessel[] = [
+                {
+                    id: 1,
+                    port_of_loading: execContext.locks[0].id,
+                    port_of_discharge: execContext.locks[3].id,
+                    departure_date: "2020-07-08T05:57:44.000000Z",
+                    arrival_date: "2020-07-08T05:57:44.000000Z",
+                    carrier: "New Diamond",
+                },
+                {
+                    id: 2,
+                    port_of_loading: execContext.locks[0].id,
+                    port_of_discharge: execContext.locks[5].id,
+                    departure_date: "2020-07-08T05:57:44.000000Z",
+                    arrival_date: "2020-07-08T05:57:44.000000Z",
+                    carrier: "Diana",
+                },
+                {
+                    id: 3,
+                    port_of_loading: execContext.locks[1].id,
+                    port_of_discharge: execContext.locks[7].id,
+                    departure_date: "2020-07-08T05:57:44.000000Z",
+                    arrival_date: "2020-07-08T05:57:44.000000Z",
+                    carrier: "Charles III",
+                }
+        ]
 
-        // Make basic assumptions for these events
-        EventAtLocationNode.all(cy).forEach((e) => {
-            e.calculateBasicAttributes();
-        });
 
-        // If we have the same event happening in a location that is near, then it's prolly the same event
-        EventAtLocationNode.all(cy).forEach((e) => {
-            if (cy.hasElementWithId(e.id)) {
-                e.mergeToMainLocationIfrequired();
-            }
-        });
+     // Make event-nodes per TU and per location and attach the basic SSs
+     if(sseventNodes.length >7){
+         const vesselInfo_edge_0_2 : VesselInfomation[]= [{
+             Carrier: vesselInput[1],
+             TravelInfo: {  Current_Speed: '5mph',
+            Expected_Speed: '4mph',
+            Expected_waiting_time: '20 min'} as TravelInfo
+         }];
+         const vesselInfo_edge_0_1 : VesselInfomation[]= [{
+            Carrier: vesselInput[3],
+            TravelInfo: {  Current_Speed: null,
+           Expected_Speed: '2mph',
+           Expected_waiting_time: '10 min'
+            } as TravelInfo
+        }];
+        const vesselInfo_edge_2_3 : VesselInfomation[]= [{
+            Carrier: vesselInput[1],
+            TravelInfo: { Current_Speed: null,
+           Expected_Speed: '4mph',
+           Expected_waiting_time: '20 min'
+            } as TravelInfo
+        }];
+        const vesselInfo_edge_1_3 : VesselInfomation[]= [{
+            Carrier: vesselInput[2],
+            TravelInfo: { Current_Speed: '7mph',
+           Expected_Speed: '4mph',
+           Expected_waiting_time: '13 min'
+        }as TravelInfo
+        },
+        {
+            Carrier: vesselInput[2],
+            TravelInfo: {  Current_Speed: null,
+           Expected_Speed: '4mph',
+           Expected_waiting_time: '9 min'
+            }as TravelInfo
+        }
+    ];
+    const vesselInfo_edge_3_4 : VesselInfomation[]= [{
+        Carrier: vesselInput[2],
+        TravelInfo: {  Current_Speed: '4.5 mph',
+       Expected_Speed: '4mph',
+       Expected_waiting_time: '30 min'
+    }as TravelInfo
+    }];
+    const vesselInfo_edge_4_5 : VesselInfomation[]= [{
+        Carrier: vesselInput[2],
+        TravelInfo: {  Current_Speed: null,
+       Expected_Speed: '4mph',
+       Expected_waiting_time: '19 min'
+        }as TravelInfo
+    }];
+    const vesselInfo_edge_3_6 : VesselInfomation[]= [{
+        Carrier: vesselInput[0],
+        TravelInfo: { Current_Speed: '2mph',
+       Expected_Speed: '4mph',
+       Expected_waiting_time: '19 min'
+        }as TravelInfo
+    }];
+    const vesselInfo_edge_6_7 : VesselInfomation[]= [{
+        Carrier: vesselInput[0],
+        TravelInfo: {   Current_Speed: null,
+       Expected_Speed: '4mph',
+       Expected_waiting_time: '5 min'
+        }as TravelInfo
+    }];
 
-        // Connect each event to the next event
-        EventAtLocationNode.all(cy)
-            .sort(EventAtLocationNode.sortByNaturalShipmentOrder)
-            .forEach((e) => {
-                connectToNextEvent(e);
-            });
 
-        // Connect each event to the next event within 24 hours
-        EventAtLocationNode.all(cy)
-            .filter((e) => e.streamNodes('upstream').length === 0)
-            .forEach((e) => {
-                connectToNext24HoursEvent(e);
-            });
+     cy.add({
+        data: {
+            source: sseventNodes[0].id,
+            target: sseventNodes[1].id,
+            type: this.DECLARING_SS_EDGE_TYPE,
+            vesselInfo: vesselInfo_edge_0_1,
+            corridor_name: 'name1',
+            graph_source: 'inline_edge_add' + this.DECLARING_SS_EDGE_TYPE,
+        },
+    } as EdgeDefinition);
 
-        // Connect each event to the null events
-        EventAtLocationNode.all(cy)
-            .filter((e) => e.streamNodes('upstream').length === 0)
-            .forEach((e) => {
-                connectToNullEventdateEvent(e);
-            });
+    cy.add({
+        data: {
+            source: sseventNodes[0].id,
+            target: sseventNodes[2].id,
+            type: this.DECLARING_SS_EDGE_TYPE,
+            vesselInfo: vesselInfo_edge_0_2,
+            corridor_name: 'name2',
+            graph_source: 'inline_edge_add' + this.DECLARING_SS_EDGE_TYPE,
+        },
+    } as EdgeDefinition);
 
-        // Set downstream actuals consistently
-        // EventAtLocationNode.all(cy).forEach((e) => {
-        //     e.setActualsConsitentlyInStream();
-        // });
+    cy.add({
+        data: {
+            source: sseventNodes[2].id,
+            target: sseventNodes[3].id,
+            type: this.DECLARING_SS_EDGE_TYPE,
+            vesselInfo: vesselInfo_edge_2_3,
+            corridor_name: 'name3',
+            graph_source: 'inline_edge_add' + this.DECLARING_SS_EDGE_TYPE,
+        },
+    } as EdgeDefinition);
 
-        // Make the LBNs (Location Border Nodes) by walking over each
-        const booking_details = execContext.shipment_statuses.filter(
-            (e) =>
-                e.message == 'Booking details' &&
-                e.specific_status.bill_of_lading_reference != null &&
-                e.specific_status.booking_reference != null,
-        );
-        EventAtLocationNode.all(cy)
-            .filter((e) => e.streamNodes('upstream').length === 0)
-            .forEach((e) => {
-                // this means we're looking at a new TP for a specific TU
-                const downStreamNodes = e.streamNodes('downstream');
-                let previousNode = e;
-                let previousLBN: LocationBorderNode | null = null;
-                downStreamNodes.forEach((n) => {
-                    if (
-                        n.data.location.id !== previousNode.data.location.id &&
-                        DistanceCalculator.distanceinKilometers(
-                            n.data.location.point,
-                            previousNode.data.location.point,
-                        ) > 20
-                    ) {
-                        // the previous was an outgoing and we are an incoming
-                        const booking = booking_details
-                            .filter(
-                                (e) =>
-                                    e.shipment_condition_reading_source_id ===
-                                    n.data.shipment_condition_reading_source_id,
-                            )
-                            .shift()?.specific_status.booking_reference;
-                        const nout = LocationBorderNode.firstOrCreate('OUT', previousNode, cy, booking ? booking : '');
-                        const nin = LocationBorderNode.firstOrCreate('IN', n, cy, '');
+    cy.add({
+        data: {
+            source: sseventNodes[1].id,
+            target: sseventNodes[3].id,
+            type: this.DECLARING_SS_EDGE_TYPE,
+            vesselInfo: vesselInfo_edge_1_3,
+            corridor_name: 'name4',
+            graph_source: 'inline_edge_add' + this.DECLARING_SS_EDGE_TYPE,
+        },
+    } as EdgeDefinition);
 
-                        // Connect these nodes
-                        cy.add({
-                            data: {
-                                source: nout.id,
-                                target: nin.id,
-                                carrier_transport_unit: nin.data.carrier_transport_unit,
-                                carrier: nin.data.carrier,
-                                type: LocationBorderNode.NEXT_LOCATION_EALN_EDGE,
-                            },
-                        });
-                        if (previousLBN) {
-                            cy.add({
-                                data: {
-                                    source: previousLBN.id,
-                                    target: nout.id,
-                                    type: LocationBorderNode.INT_LOCATION_EALN_EDGE,
-                                },
-                            });
-                        }
-                        previousLBN = nin;
-                    }
-                    previousNode = n;
-                });
-            });
+    cy.add({
+        data: {
+            source: sseventNodes[3].id,
+            target: sseventNodes[4].id,
+            type: this.DECLARING_SS_EDGE_TYPE,
+            vesselInfo: vesselInfo_edge_3_4,
+            corridor_name: 'name5',
+            graph_source: 'inline_edge_add' + this.DECLARING_SS_EDGE_TYPE,
+        },
+    } as EdgeDefinition);
 
-        // Apply final styling
-        EventAtLocationNode.all(cy).forEach((e) => e.finalStyling());
+    cy.add({
+        data: {
+            source: sseventNodes[4].id,
+            target: sseventNodes[5].id,
+            type: this.DECLARING_SS_EDGE_TYPE,
+            vesselInfo: vesselInfo_edge_4_5,
+            corridor_name: 'name6',
+            graph_source: 'inline_edge_add' + this.DECLARING_SS_EDGE_TYPE,
+        },
+    } as EdgeDefinition);
 
-        return cy;
+    cy.add({
+        data: {
+            source: sseventNodes[3].id,
+            target: sseventNodes[6].id,
+            type: this.DECLARING_SS_EDGE_TYPE,
+            vesselInfo: vesselInfo_edge_3_6,
+            corridor_name: 'name7',
+            graph_source: 'inline_edge_add' + this.DECLARING_SS_EDGE_TYPE,
+        },
+    } as EdgeDefinition);
+
+    cy.add({
+        data: {
+            source: sseventNodes[6].id,
+            target: sseventNodes[7].id,
+            type: this.DECLARING_SS_EDGE_TYPE,
+            vesselInfo: vesselInfo_edge_6_7,
+            corridor_name: 'name8',
+            graph_source: 'inline_edge_add' + this.DECLARING_SS_EDGE_TYPE,
+        },
+    } as EdgeDefinition);
+
     }
+
+
+
+
+    return cy;
+}
     /*
     Here we collect all ending nodes of all sea shipments.
     */
-    public getAllBorderNodes(cy: cytoscape.Core): LocationBorderNode[] {
-        const endingNodes: LocationBorderNode[] = LocationBorderNode.all(cy).filter(
-            (e) => e.streamNodes('downstream').length === 0,
-        );
-
-        const starting_containers = LocationBorderNode.all(cy)
-            .filter((e) => e.streamNodes('upstream').length === 0)
-            .reduce((starting_containers, end_node) => {
-                starting_containers += end_node.data.containers.length;
-                return starting_containers;
-            }, 0);
-
-        let ending_containers = endingNodes.reduce((ending_containers, end_node) => {
-            ending_containers += end_node.data.containers.length;
-            return ending_containers;
-        }, 0);
-
-        if (starting_containers > ending_containers) {
-            /*
-            here we have all the start and end nodes but some containers will be missing in between those tp.
-            So we go each end_node and check that any other container left before this end_node. if we have that means that containers
-            should have seperate tp.so we add that as another end_node.
-            */
-            [...endingNodes].forEach((endingNode) => {
-                let node_containers = endingNode.data.containers.length;
-                [...endingNode.streamNodes('upstream').reverse()].forEach((node) => {
-                    // check from end to start
-                    if (node.data.moveType == 'IN' && node_containers < node.data.containers.length) {
-                        // which means here we have a end node of a tp
-                        endingNodes.push(node);
-                        ending_containers += node.data.containers.length - node_containers;
-                        node_containers = node.data.containers.length;
-                    }
-
-                    if (starting_containers <= ending_containers) return;
-                });
-            });
-        }
-        return endingNodes;
-    }
-
-    /*
-    Here we check ending Node has next Node containers if there's any then we filter it.
-    */
-    public getContainers(endingNode: LocationBorderNode): TransportUnit[] {
-        if (endingNode.streamNodes('downstream').length === 0) return endingNode.data.containers;
-
-        const donwstream_containers = endingNode.streamNodes('downstream')?.[0].data.containers;
-        return endingNode.data.containers.filter((x: TransportUnit) => {
-            if (donwstream_containers.filter((e: TransportUnit) => e.reference === x.reference).length == 0) return x;
-        });
-    }
 }

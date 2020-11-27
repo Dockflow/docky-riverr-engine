@@ -1,14 +1,14 @@
-import { DockyShipmentStatus } from './docky-shipment-status-types';
+import { Locks } from './docky-shipment-status-types';
 import { ExecutionConfiguration } from './execution-configuration';
 
 export type RequestContext = {
-    shipment_statuses: DockyShipmentStatus[];
+    locks: Locks[];
     config?: ExecutionConfiguration;
     tradeflow_id: string;
 };
 
 export type ExecutionContext = {
-    shipment_statuses: DockyShipmentStatus[];
+    locks: Locks[];
     config: ExecutionConfiguration;
     tradeflow_id: string;
 };

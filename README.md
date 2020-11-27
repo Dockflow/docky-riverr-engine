@@ -1,6 +1,6 @@
 # GraphTP
 
-The hassle-free solution for sharing maritime shipping information.
+The hassle-free solution for Corridor Traffic Management.
 
 ## Documentation
 

@@ -12,7 +12,7 @@ graphyServer.register(DisplayCore);
 graphyServer.register(InfluxCore);
 
 if (config.server.env === 'test') {
-    [...Array(30).keys()].map(async (key) => {
+    [1].map(async (key) => {
         if (key === 0) {
             return true;
         }
