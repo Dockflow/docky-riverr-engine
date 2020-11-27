@@ -28,7 +28,7 @@ export class StoryBuildingCore {
                 port_of_discharge: execContext.locks[3].location.name,
                 departure_date: '2020-07-08T05:57:44.000000Z',
                 arrival_date: '2020-07-08T05:57:44.000000Z',
-                carrier: 'New Diamond',
+                name: 'New Diamond',
             },
             {
                 id: 2,
@@ -36,7 +36,7 @@ export class StoryBuildingCore {
                 port_of_discharge: execContext.locks[5].location.name,
                 departure_date: '2020-07-08T05:57:44.000000Z',
                 arrival_date: '2020-07-08T05:57:44.000000Z',
-                carrier: 'Diana',
+                name: 'Diana',
             },
             {
                 id: 3,
@@ -44,11 +44,11 @@ export class StoryBuildingCore {
                 port_of_discharge: execContext.locks[7].location.name,
                 departure_date: '2020-07-08T05:57:44.000000Z',
                 arrival_date: '2020-07-08T05:57:44.000000Z',
-                carrier: 'Charles III',
+                name: 'Charles III',
             },
         ];
 
-        // Make event-nodes per TU and per location and attach the basic SSs
+        // vessel 1 path
         if (sseventNodes.length > 7) {
             const vesselInfo_edge_0_2: VesselInfomation[] = [
                 {
@@ -57,19 +57,11 @@ export class StoryBuildingCore {
                         Current_Speed: '5mph',
                         Expected_Speed: '4mph',
                         Expected_waiting_time: '20 min',
+                        NextLock: 'Sluis te Asper',
                     } as TravelInfo,
                 },
             ];
-            const vesselInfo_edge_0_1: VesselInfomation[] = [
-                {
-                    Carrier: vesselInput[3],
-                    TravelInfo: {
-                        Current_Speed: null,
-                        Expected_Speed: '2mph',
-                        Expected_waiting_time: '10 min',
-                    } as TravelInfo,
-                },
-            ];
+
             const vesselInfo_edge_2_3: VesselInfomation[] = [
                 {
                     Carrier: vesselInput[1],
@@ -77,6 +69,19 @@ export class StoryBuildingCore {
                         Current_Speed: null,
                         Expected_Speed: '4mph',
                         Expected_waiting_time: '20 min',
+                        NextLock: 'Sluis te Oudenaarde',
+                    } as TravelInfo,
+                },
+            ];
+            // vessel 2 path
+            const vesselInfo_edge_0_1: VesselInfomation[] = [
+                {
+                    Carrier: vesselInput[2],
+                    TravelInfo: {
+                        Current_Speed: null,
+                        Expected_Speed: '2mph',
+                        Expected_waiting_time: '10 min',
+                        NextLock: 'Sluizen te Merelbeke',
                     } as TravelInfo,
                 },
             ];
@@ -87,14 +92,16 @@ export class StoryBuildingCore {
                         Current_Speed: '7mph',
                         Expected_Speed: '4mph',
                         Expected_waiting_time: '13 min',
+                        NextLock: 'Sluis te Oudenaarde',
                     } as TravelInfo,
                 },
                 {
-                    Carrier: vesselInput[2],
+                    Carrier: vesselInput[0],
                     TravelInfo: {
                         Current_Speed: null,
-                        Expected_Speed: '4mph',
-                        Expected_waiting_time: '9 min',
+                        Expected_Speed: '3.5mph',
+                        Expected_waiting_time: '17 min',
+                        NextLock: 'Sluis te Oudenaarde',
                     } as TravelInfo,
                 },
             ];
@@ -105,6 +112,7 @@ export class StoryBuildingCore {
                         Current_Speed: '4.5 mph',
                         Expected_Speed: '4mph',
                         Expected_waiting_time: '30 min',
+                        NextLock: 'Sluis te bossuit',
                     } as TravelInfo,
                 },
             ];
@@ -115,9 +123,12 @@ export class StoryBuildingCore {
                         Current_Speed: null,
                         Expected_Speed: '4mph',
                         Expected_waiting_time: '19 min',
+                        NextLock: 'Sluis te Moen',
                     } as TravelInfo,
                 },
             ];
+
+            // vessel 3 path
             const vesselInfo_edge_3_6: VesselInfomation[] = [
                 {
                     Carrier: vesselInput[0],
@@ -125,6 +136,7 @@ export class StoryBuildingCore {
                         Current_Speed: '2mph',
                         Expected_Speed: '4mph',
                         Expected_waiting_time: '19 min',
+                        NextLock: 'Nieuwe sluis te Zwevegem',
                     } as TravelInfo,
                 },
             ];
@@ -135,21 +147,12 @@ export class StoryBuildingCore {
                         Current_Speed: null,
                         Expected_Speed: '4mph',
                         Expected_waiting_time: '5 min',
+                        NextLock: 'Sluis 11 te Kortrijk',
                     } as TravelInfo,
                 },
             ];
 
-            cy.add({
-                data: {
-                    source: sseventNodes[0].id,
-                    target: sseventNodes[1].id,
-                    type: this.DECLARING_SS_EDGE_TYPE,
-                    vesselInfo: vesselInfo_edge_0_1,
-                    corridor_name: 'Scheldt',
-                    graph_source: 'inline_edge_add' + this.DECLARING_SS_EDGE_TYPE,
-                },
-            } as EdgeDefinition);
-
+            // vessel 1 edges
             cy.add({
                 data: {
                     source: sseventNodes[0].id,
@@ -172,6 +175,17 @@ export class StoryBuildingCore {
                 },
             } as EdgeDefinition);
 
+            // vessel 2 edges
+            cy.add({
+                data: {
+                    source: sseventNodes[0].id,
+                    target: sseventNodes[1].id,
+                    type: this.DECLARING_SS_EDGE_TYPE,
+                    vesselInfo: vesselInfo_edge_0_1,
+                    corridor_name: 'Scheldt',
+                    graph_source: 'inline_edge_add' + this.DECLARING_SS_EDGE_TYPE,
+                },
+            } as EdgeDefinition);
             cy.add({
                 data: {
                     source: sseventNodes[1].id,
@@ -205,6 +219,7 @@ export class StoryBuildingCore {
                 },
             } as EdgeDefinition);
 
+            // vessel 3 edges
             cy.add({
                 data: {
                     source: sseventNodes[3].id,

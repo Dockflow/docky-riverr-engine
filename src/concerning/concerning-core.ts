@@ -22,6 +22,7 @@ export class ConcerningCore {
             let carrier: Vessel | null = null;
             let current_speed = '';
             let current_location = '';
+            let next_lock = '';
             let expected_speed = '';
             let expected_waiting = '';
             cy.edges().filter((e) => {
@@ -33,6 +34,7 @@ export class ConcerningCore {
                         if (element.TravelInfo.Current_Speed) {
                             current_speed = element.TravelInfo.Current_Speed;
                             expected_speed = element.TravelInfo.Expected_Speed;
+                            next_lock = element.TravelInfo.NextLock;
                             current_location = element.TravelInfo.CorridorName ? element.TravelInfo.CorridorName : '';
                             expected_waiting = element.TravelInfo.Expected_waiting_time;
                         }
@@ -40,18 +42,19 @@ export class ConcerningCore {
                 });
             });
             segments.push({
-                vessel: carrier ? carrier : null,
+                carrier: carrier ? carrier : null,
                 current_speed: current_speed,
                 current_corridor_location: current_location,
                 expected_speed: expected_speed,
                 travel_path: travelInfo,
+                next_lock: next_lock,
                 next_waitingTime: expected_waiting,
             } as TransportSegment);
         });
 
         const uotm = {
             tradeflow_id: execContext.tradeflow_id,
-            segments: segments.filter((e) => e.vessel !== null),
+            segments: segments.filter((e) => e.carrier !== null),
             hash: '--placeholder--',
         } as UOTMMessage;
         uotm.hash = sha1(uotm);

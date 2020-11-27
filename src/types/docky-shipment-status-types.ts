@@ -4,7 +4,7 @@ export type Vessel = {
     port_of_discharge: string;
     departure_date: string | null;
     arrival_date: string | null;
-    carrier: string;
+    name: string;
 };
 
 export type VesselInfomation = {
@@ -17,6 +17,7 @@ export type TravelInfo = {
     Expected_Speed: string;
     Expected_waiting_time: string;
     CorridorName: string | null;
+    NextLock: string;
 };
 
 export type Locks = {
